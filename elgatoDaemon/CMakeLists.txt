@@ -1,5 +1,5 @@
 set(DAEMON_SOURCES
-        main.cpp AvahiBrowser.cpp AvahiBrowser.h Log.cpp Log.h)
+        main.cpp AvahiBrowser.cpp Log.cpp)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
