@@ -57,9 +57,6 @@ class ElgatoLight final {
 public:
     ElgatoLight(std::string name, char* address, uint16_t port);
 
-    // Overload == to make equality check based on name
-    bool operator==(const ElgatoLight &other) const;
-
     [[nodiscard]] std::string name() const { return _name; }
     [[nodiscard]] in_addr address() const { return _address; }
     [[nodiscard]] uint16_t port() const { return _port; }

@@ -15,6 +15,10 @@ int main(int argc, char*argv[]) {
 
     while (line != "q") {
 
+        if (line == "r") {
+            AvahiBrowser::getInstance().restart();
+        }
+
         if (line == "l") {
             for(auto& it : AvahiBrowser::getInstance().getLights()) {
                 std::cout << "Found: " << it->name() << std::endl;

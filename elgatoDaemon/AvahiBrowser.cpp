@@ -40,6 +40,8 @@ void AvahiBrowser::resolveCallback(AvahiServiceResolver* resolver, AvahiIfIndex 
                                    AvahiStringList* txt, AvahiLookupResultFlags flags, void* userdata) {
     assert(resolver);
 
+    std::clog << kLogDebug << "Resolving device " << name << " at " << hostname << std::endl;
+
     switch(event) {
         case AVAHI_RESOLVER_FAILURE:
             std::clog << kLogErr << "(AvahiResolver) Failed to resolve service '" << name << "' of type '" << type << "' in domain '" << domain << "': " << avahi_strerror(
@@ -121,12 +123,13 @@ void AvahiBrowser::threadStart() {
     }
 
     avahi_simple_poll_loop(getInstance()._simple_poll);
-
-    pthread_exit(NULL);
 }
 
 void AvahiBrowser::addIfUnknown(std::shared_ptr<ElgatoLight>& light) {
-    auto item = std::find(_lights.begin(), _lights.end(), light);
+    auto item = std::find_if(_lights.begin(), _lights.end(),
+                             [light](const std::shared_ptr<ElgatoLight>& item) {
+        return item->name() == light->name();
+    });
 
     if (item == _lights.end())
         _lights.push_back(light);
@@ -154,4 +157,9 @@ void AvahiBrowser::cleanUp() {
 
 void AvahiBrowser::start() {
     _workerThread = new std::thread(threadStart);
+}
+
+void AvahiBrowser::restart() {
+    cleanUp();
+    start();
 }

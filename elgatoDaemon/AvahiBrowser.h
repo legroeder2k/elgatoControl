@@ -51,6 +51,7 @@ public:
     std::vector<std::shared_ptr<ElgatoLight>> getLights() { return _lights; }
 
     void start();
+    void restart();
 private:
     AvahiBrowser() = default;
 

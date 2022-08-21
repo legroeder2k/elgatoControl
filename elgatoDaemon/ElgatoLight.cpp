@@ -42,10 +42,6 @@ ElgatoLight::ElgatoLight(std::string name, char* address, uint16_t port) : _name
     if (_accessoryInfo != nullptr) queryState();
 }
 
-bool ElgatoLight::operator==(const ElgatoLight &other) const {
-        return _name == other._name;
-}
-
 std::string ElgatoLight::portString() const {
     char address[20];
 
