@@ -91,7 +91,7 @@ void AvahiBrowser::browseCallback(AvahiServiceBrowser* browser, AvahiIfIndex int
     }
 }
 
-void AvahiBrowser::clientCallback(AvahiClient* client, AvahiClientState state, [[maybe_unused]] void* userData) {
+void AvahiBrowser::clientCallback([[maybe_unused]] AvahiClient* client, AvahiClientState state, [[maybe_unused]] void* userData) {
     assert(client);
 
     if (state == AVAHI_CLIENT_FAILURE)
