@@ -1,5 +1,5 @@
 set(DAEMON_SOURCES
-        main.cpp AvahiBrowser.cpp Log.cpp ElgatoLight.cpp HTTPRequest.hpp)
+        main.cpp AvahiBrowser.cpp Log.cpp ElgatoLight.cpp HTTPRequest.hpp ElgatoServerImpl.cpp)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 

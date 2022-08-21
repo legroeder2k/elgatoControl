@@ -1,2 +1,2 @@
 cmake-build-debug/*
-/elgatoDaemon/Config.h
+Config.h

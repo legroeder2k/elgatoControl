@@ -6,18 +6,19 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/CmakeScripts)
 
 if (NOT DEFINED CONFIG_PATH)
-set(CONFIG_PATH ~/.config/elgatoControl)
+set(CONFIG_PATH "$[HOME]/.config/elgatoControl")
 endif()
 
 if (NOT DEFINED SOCKET_FILE)
-    set(SOCKET_FILE ~/.local/run/elgatoDaemon)
+    set(SOCKET_FILE "$[HOME]/.local/elgatoDaemon.sock")
 endif()
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-configure_file(${CMAKE_SOURCE_DIR}/elgatoDaemon/Config.h.in ${CMAKE_SOURCE_DIR}/elgatoDaemon/Config.h)
+configure_file(${CMAKE_SOURCE_DIR}/elgatoDaemon/Config.h.in ${CMAKE_SOURCE_DIR}/Config.h)
 
 add_subdirectory(elgatoDaemon)
+add_subdirectory(elgato-cli)
 add_subdirectory(proto)

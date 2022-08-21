@@ -1,13 +1,18 @@
 #include <iostream>
 #include <string>
+#include "../Config.h"
 #include "Log.h"
 #include "AvahiBrowser.h"
+#include "ElgatoServerImpl.h"
 
 int main([[maybe_unused]]int argc, [[maybe_unused]]char*argv[]) {
     std::clog.rdbuf(new Log("elgatoDaemon", LOG_LOCAL0));
     std::clog << kLogNotice << "Elgato daemon starting." << std::endl;
 
     AvahiBrowser::getInstance().start();
+
+    ElgatoServerImpl elgatoServer;
+    elgatoServer.RunServer(SOCKET_FILE);
 
     std::string line;
     std::cout << "Console interface:\n  q -> quit, l -> list all devices, s -> status, 1 -> on, 0 -> off, b -> 25% brightness, B -> 100% brightness, t -> 4000K temp, T -> 7000K temp" << std::endl;
