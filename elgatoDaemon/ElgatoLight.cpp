@@ -32,6 +32,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <fmt/core.h>
+#include <future>
 
 using json = nlohmann::json;
 
@@ -117,6 +118,7 @@ bool ElgatoLight::sendRequest(const std::string& requestBody) {
         _stateInfo = std::make_shared<ElgatoStateInfo>(json::parse(resString).get<ElgatoStateInfo>() );
 
         std::clog << kLogDebug << "(ElgatoLight) response: " << resString << std::endl;
+        notifyObservers({name()});
 
         return true;
     } catch (const std::exception& e) {
@@ -137,6 +139,21 @@ uint16_t ElgatoLight::colorToElgato(int colorValue) {
     if (converted > 344) converted = 344;
 
     return converted;
+}
+
+void ElgatoLight::registerCallback(std::function<void(const ElgatoStateChangedEventArgs&)>& observer) {
+    _callbacks.push_back(observer);
+}
+
+void ElgatoLight::notifyObservers(const ElgatoStateChangedEventArgs& args) {
+    if (_callbacks.empty()) return;
+
+    // FIXME: Do not use std::async, use std::thread and detach...
+    std::async(std::launch::async, [this, args] {
+       for(const auto& callback : _callbacks) {
+           callback(args);
+       }
+    });
 }
 
 void from_json(const json& js, ElgatoAccessoryInfo& info) {

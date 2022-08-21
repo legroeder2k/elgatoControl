@@ -176,6 +176,7 @@ void AvahiBrowser::registerCallback(const std::function<void(const AvahiBrowserE
 void AvahiBrowser::notifyObservers(const AvahiBrowserEventArgs& args) {
     if (_callbacks.empty()) return;
 
+    // FIXME: Do not use std::async, use std::thread and detach...
     std::async(std::launch::async, [args, this]{
         for(const auto& callback : _callbacks) {
             callback(args);
