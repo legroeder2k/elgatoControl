@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(elgatoControl)
+project(elgatoControl VERSION 0.1 DESCRIPTION "Controlling elgato fixtures using a client/server approach")
 
 set(CMAKE_CXX_STANDARD 17)
 
