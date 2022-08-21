@@ -169,17 +169,17 @@ void AvahiBrowser::restart() {
     start();
 }
 
-void AvahiBrowser::registerCallback(const std::function<void(const AvahiBrowserEventArgs&)>& functor) {
-    _callbacks.push_back(functor);
+void AvahiBrowser::registerCallback(const std::function<void(const AvahiBrowserEventArgs&)>& oberserver) {
+    _callbacks.push_back(oberserver);
 }
 
 void AvahiBrowser::notifyObservers(const AvahiBrowserEventArgs& args) {
     if (_callbacks.empty()) return;
 
-    // FIXME: Do not use std::async, use std::thread and detach...
-    std::async(std::launch::async, [args, this]{
+    std::thread caller([args, this]{
         for(const auto& callback : _callbacks) {
             callback(args);
         }
     });
+    caller.detach();
 }

@@ -148,12 +148,12 @@ void ElgatoLight::registerCallback(std::function<void(const ElgatoStateChangedEv
 void ElgatoLight::notifyObservers(const ElgatoStateChangedEventArgs& args) {
     if (_callbacks.empty()) return;
 
-    // FIXME: Do not use std::async, use std::thread and detach...
-    std::async(std::launch::async, [this, args] {
-       for(const auto& callback : _callbacks) {
-           callback(args);
-       }
+    std::thread caller([args, this] {
+        for(const auto& callback : _callbacks){
+            callback(args);
+        }
     });
+    caller.detach();
 }
 
 void from_json(const json& js, ElgatoAccessoryInfo& info) {
