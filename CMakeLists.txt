@@ -20,3 +20,4 @@ endif()
 configure_file(${CMAKE_SOURCE_DIR}/elgatoDaemon/Config.h.in ${CMAKE_SOURCE_DIR}/elgatoDaemon/Config.h)
 
 add_subdirectory(elgatoDaemon)
+add_subdirectory(proto)

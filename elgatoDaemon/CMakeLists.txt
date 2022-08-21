@@ -12,4 +12,5 @@ add_compile_options(-Wall -Wextra -pedantic -Werror)
 message(STATUS "Build type for daemon: ${CMAKE_BUILD_TYPE}")
 
 add_executable(elgatoDaemon ${DAEMON_SOURCES})
-target_link_libraries(elgatoDaemon Avahi::client nlohmann_json::nlohmann_json fmt::fmt)
+target_link_libraries(elgatoDaemon PUBLIC Avahi::client nlohmann_json::nlohmann_json fmt::fmt)
+target_link_libraries(elgatoDaemon PRIVATE elgatoProto)
