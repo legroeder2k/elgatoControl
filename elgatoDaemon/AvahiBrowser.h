@@ -31,6 +31,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <thread>
 #include <avahi-common/simple-watch.h>
 #include <avahi-client/lookup.h>
 
@@ -59,16 +60,15 @@ private:
     static void browseCallback(AvahiServiceBrowser*, AvahiIfIndex, AvahiProtocol, AvahiBrowserEvent, const char* , const char*,
                         const char*, [[maybe_unused]] AvahiLookupResultFlags, void*);
     static void clientCallback(AvahiClient*, AvahiClientState, [[maybe_unused]] void*);
-    static void* threadStart(void* );
+    static void threadStart();
     void cleanUp();
 
     void addIfUnknown(std::shared_ptr<ElgatoLight>& light);
     void removeByName(std::string name);
 
     std::vector<std::shared_ptr<ElgatoLight>> _lights;
-    pthread_t _runningThread;
-    pthread_mutex_t _listAccessMutex = PTHREAD_MUTEX_INITIALIZER;
 
+    std::thread* _workerThread = nullptr;
     AvahiSimplePoll* _simple_poll = nullptr;
     AvahiClient* _client = NULL;
     AvahiServiceBrowser* _browser = NULL;

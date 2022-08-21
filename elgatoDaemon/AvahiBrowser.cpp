@@ -28,10 +28,11 @@
 #include "Log.h"
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 
 #include <avahi-common/error.h>
+#include <thread>
 
 void AvahiBrowser::resolveCallback(AvahiServiceResolver* resolver, AvahiIfIndex interface, AvahiProtocol protocol,
                                    AvahiResolverEvent event, const char* name, const char* type, const char* domain,
@@ -88,7 +89,7 @@ void AvahiBrowser::clientCallback(AvahiClient* client, AvahiClientState state, v
     }
 }
 
-void* AvahiBrowser::threadStart(void *) {
+void AvahiBrowser::threadStart() {
     std::clog << kLogNotice << "(Avahi) Starting browser..." << std::endl;
 
     int error;
@@ -98,7 +99,7 @@ void* AvahiBrowser::threadStart(void *) {
     if (!(getInstance()._simple_poll = avahi_simple_poll_new())) {
         std::clog << kLogErr << "(Avahi) Failed to create simple poll object." << std::endl;
         getInstance().cleanUp();
-        pthread_exit(NULL);
+        return;
     }
 
     // Create a new client
@@ -106,14 +107,14 @@ void* AvahiBrowser::threadStart(void *) {
     if (!getInstance()._client) {
         std::clog << kLogErr << "(Avahi) Failed to create client: " << avahi_strerror(avahi_client_errno(getInstance()._client)) << std::endl;
         getInstance().cleanUp();
-        pthread_exit(NULL);
+        return;
     }
 
     // Create the service browser
     if (!(getInstance()._browser = avahi_service_browser_new(getInstance()._client, AVAHI_IF_UNSPEC, AVAHI_PROTO_INET, "_elg._tcp", NULL, (AvahiLookupFlags)0, browseCallback, getInstance()._client))) {
         std::clog << kLogErr << "(Avahi) Failed to create browser: " << avahi_strerror(avahi_client_errno(getInstance()._client)) << std::endl;
         getInstance().cleanUp();
-        pthread_exit(NULL);
+        return;
     }
 
     avahi_simple_poll_loop(getInstance()._simple_poll);
@@ -137,14 +138,17 @@ void AvahiBrowser::removeByName(std::string name) {
 }
 
 void AvahiBrowser::cleanUp() {
+    if (_workerThread) {
+        pthread_cancel(_workerThread->native_handle());
+        _workerThread->join();
+        delete _workerThread;
+    }
+
     if (_browser) avahi_service_browser_free(_browser);
     if (_client) avahi_client_free(_client);
     if (_simple_poll) avahi_simple_poll_free(_simple_poll);
 }
 
 void AvahiBrowser::start() {
-    auto res = pthread_create(&_runningThread, NULL, threadStart, NULL);
-    if (res) {
-        std::clog << kLogErr << "(Avahi) Failed to create thread: " << res << std::endl;
-    }
+    _workerThread = new std::thread(threadStart);
 }
