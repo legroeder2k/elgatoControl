@@ -71,12 +71,12 @@ public:
 private:
     AvahiBrowser() = default;
 
-    static void resolveCallback(AvahiServiceResolver*, [[maybe_unused]] AvahiIfIndex, [[maybe_unused]] AvahiProtocol,
+    static void resolveCallback(AvahiServiceResolver*, AvahiIfIndex, AvahiProtocol,
                          AvahiResolverEvent, const char*, const char*, const char*, const char*, const AvahiAddress*,
-                         uint16_t, AvahiStringList*, AvahiLookupResultFlags, [[maybe_unused]] void*);
+                         uint16_t, AvahiStringList*, AvahiLookupResultFlags, void*);
     static void browseCallback(AvahiServiceBrowser*, AvahiIfIndex, AvahiProtocol, AvahiBrowserEvent, const char* , const char*,
-                        const char*, [[maybe_unused]] AvahiLookupResultFlags, void*);
-    static void clientCallback(AvahiClient*, AvahiClientState, [[maybe_unused]] void*);
+                        const char*, AvahiLookupResultFlags, void*);
+    static void clientCallback(AvahiClient*, AvahiClientState, void*);
     static void threadStart();
     void cleanUp();
 

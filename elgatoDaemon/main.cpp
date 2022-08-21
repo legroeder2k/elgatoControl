@@ -3,7 +3,7 @@
 #include "Log.h"
 #include "AvahiBrowser.h"
 
-int main(int argc, char*argv[]) {
+int main([[maybe_unused]]int argc, [[maybe_unused]]char*argv[]) {
     std::clog.rdbuf(new Log("elgatoDaemon", LOG_LOCAL0));
     std::clog << kLogNotice << "Elgato daemon starting." << std::endl;
 

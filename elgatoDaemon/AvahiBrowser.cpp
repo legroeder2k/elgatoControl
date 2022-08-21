@@ -35,10 +35,12 @@
 #include <thread>
 #include <future>
 
-void AvahiBrowser::resolveCallback(AvahiServiceResolver* resolver, AvahiIfIndex interface, AvahiProtocol protocol,
-                                   AvahiResolverEvent event, const char* name, const char* type, const char* domain,
-                                   const char* hostname, const AvahiAddress* address, uint16_t port,
-                                   AvahiStringList* txt, AvahiLookupResultFlags flags, void* userdata) {
+void AvahiBrowser::resolveCallback(AvahiServiceResolver* resolver, [[maybe_unused]] AvahiIfIndex interface,
+                                   [[maybe_unused]]AvahiProtocol protocol, AvahiResolverEvent event, const char* name,
+                                   const char* type, const char* domain, const char* hostname,
+                                   const AvahiAddress* address, uint16_t port,
+                                   [[maybe_unused]] AvahiStringList* txt, [[maybe_unused]] AvahiLookupResultFlags flags,
+                                   [[maybe_unused]] void* userdata) {
     assert(resolver);
 
     std::clog << kLogDebug << "Resolving device " << name << " at " << hostname << std::endl;
@@ -62,7 +64,7 @@ void AvahiBrowser::resolveCallback(AvahiServiceResolver* resolver, AvahiIfIndex 
 
 void AvahiBrowser::browseCallback(AvahiServiceBrowser* browser, AvahiIfIndex interface, AvahiProtocol protocol,
                                   AvahiBrowserEvent event, const char* name, const char* type, const char * domain,
-                                  AvahiLookupResultFlags flags, void* userdata) {
+                                  [[maybe_unused]] AvahiLookupResultFlags flags, void* userdata) {
     auto *client = (AvahiClient*) userdata;
     assert(browser);
 
@@ -88,7 +90,7 @@ void AvahiBrowser::browseCallback(AvahiServiceBrowser* browser, AvahiIfIndex int
     }
 }
 
-void AvahiBrowser::clientCallback(AvahiClient* client, AvahiClientState state, void* userData) {
+void AvahiBrowser::clientCallback(AvahiClient* client, AvahiClientState state, [[maybe_unused]] void* userData) {
     assert(client);
 
     if (state == AVAHI_CLIENT_FAILURE)
@@ -101,7 +103,6 @@ void AvahiBrowser::threadStart() {
     std::clog << kLogNotice << "(Avahi) Starting browser..." << std::endl;
 
     int error;
-    int ret = 1;
 
     // Create the poll loop object
     if (!(getInstance()._simple_poll = avahi_simple_poll_new())) {
