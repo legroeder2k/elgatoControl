@@ -48,7 +48,7 @@ void AvahiBrowser::resolveCallback(AvahiServiceResolver* resolver, AvahiIfIndex 
             char strAddress[AVAHI_ADDRESS_STR_MAX];
             avahi_address_snprint(strAddress, sizeof(strAddress), address);
 
-            auto discoveredLight = std::make_shared<DiscoverdElgatoLight>(std::string(name), strAddress, port);
+            auto discoveredLight = std::make_shared<ElgatoLight>(std::string(name), strAddress, port);
             getInstance().addIfUnknown(discoveredLight);
           break;
     }
@@ -121,7 +121,7 @@ void* AvahiBrowser::threadStart(void *) {
     pthread_exit(NULL);
 }
 
-void AvahiBrowser::addIfUnknown(std::shared_ptr<DiscoverdElgatoLight>& light) {
+void AvahiBrowser::addIfUnknown(std::shared_ptr<ElgatoLight>& light) {
     auto item = std::find(_lights.begin(), _lights.end(), light);
 
     if (item == _lights.end())
@@ -131,8 +131,8 @@ void AvahiBrowser::addIfUnknown(std::shared_ptr<DiscoverdElgatoLight>& light) {
 void AvahiBrowser::removeByName(std::string name) {
     _lights.erase(
             std::remove_if(_lights.begin(), _lights.end(),
-                           [name](const std::shared_ptr<DiscoverdElgatoLight>& item) {
-                return item->name == name;
+                           [name](const std::shared_ptr<ElgatoLight>& item) {
+                return item->name() == name;
             }), _lights.end());
 }
 
@@ -143,7 +143,7 @@ void AvahiBrowser::cleanUp() {
 }
 
 void AvahiBrowser::start() {
-    auto res =pthread_create(&_runningThread, NULL, threadStart, NULL);
+    auto res = pthread_create(&_runningThread, NULL, threadStart, NULL);
     if (res) {
         std::clog << kLogErr << "(Avahi) Failed to create thread: " << res << std::endl;
     }

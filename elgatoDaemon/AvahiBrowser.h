@@ -33,23 +33,9 @@
 #include <memory>
 #include <avahi-common/simple-watch.h>
 #include <avahi-client/lookup.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
 
-struct DiscoverdElgatoLight {
-    DiscoverdElgatoLight(std::string _name, char* _address, uint16_t _port) : name(std::move(_name)), port(_port) {
-        inet_pton(AF_INET, _address, &address.s_addr);
-    }
+#include "ElgatoLight.h"
 
-    // Overload == to make equality check based on name
-    bool operator==(const DiscoverdElgatoLight &other) const {
-        return name == other.name;
-    }
-
-    std::string name = {};
-    in_addr address = {};
-    uint16_t port = 0;
-};
 
 class AvahiBrowser {
 public:
@@ -61,7 +47,7 @@ public:
     AvahiBrowser(const AvahiBrowser&) = delete;
     AvahiBrowser& operator=(const AvahiBrowser&) = delete;
 
-    std::vector<std::shared_ptr<DiscoverdElgatoLight>> getLights() { return _lights; }
+    std::vector<std::shared_ptr<ElgatoLight>> getLights() { return _lights; }
 
     void start();
 private:
@@ -76,10 +62,10 @@ private:
     static void* threadStart(void* );
     void cleanUp();
 
-    void addIfUnknown(std::shared_ptr<DiscoverdElgatoLight>& light);
+    void addIfUnknown(std::shared_ptr<ElgatoLight>& light);
     void removeByName(std::string name);
 
-    std::vector<std::shared_ptr<DiscoverdElgatoLight>> _lights;
+    std::vector<std::shared_ptr<ElgatoLight>> _lights;
     pthread_t _runningThread;
     pthread_mutex_t _listAccessMutex = PTHREAD_MUTEX_INITIALIZER;
 

@@ -10,15 +10,69 @@ int main(int argc, char*argv[]) {
     AvahiBrowser::getInstance().start();
 
     std::string line;
-    std::cout << "Press RETURN to exit." << std::endl;
+    std::cout << "Console interface:\n  q -> quit, l -> list all devices, s -> status, 1 -> on, 0 -> off, b -> 25% brightness, B -> 100% brightness, t -> 4000K temp, T -> 7000K temp" << std::endl;
     std::getline(std::cin, line);
 
     while (line != "q") {
 
-        if (line == "p") {
+        if (line == "l") {
             for(auto& it : AvahiBrowser::getInstance().getLights()) {
-                std::cout << "Found: " << it->name << std::endl;
+                std::cout << "Found: " << it->name() << std::endl;
             }
+        }
+
+        if (line == "s" && !AvahiBrowser::getInstance().getLights().empty()) {
+            auto light = AvahiBrowser::getInstance().getLights().at(0);
+
+            if (light->isReady()) {
+                std::cout << light->deviceInfo()->displayName << " is currently " <<
+                (light->deviceState()->on ? "on" : "off") << " at a temperature of " <<
+                ElgatoLight::colorFromElgato(light->deviceState()->temperature) <<
+                " and a brightness of " << std::to_string(light->deviceState()->brightness) << std::endl;
+            }
+
+        }
+
+        if (line == "1" && !AvahiBrowser::getInstance().getLights().empty()) {
+            auto light = AvahiBrowser::getInstance().getLights().at(0);
+
+            if (light->isReady())
+                light->powerOn();
+        }
+
+        if (line == "0" && !AvahiBrowser::getInstance().getLights().empty()) {
+            auto light = AvahiBrowser::getInstance().getLights().at(0);
+
+            if (light->isReady())
+                light->powerOff();
+        }
+
+        if (line == "b" && !AvahiBrowser::getInstance().getLights().empty()) {
+            auto light = AvahiBrowser::getInstance().getLights().at(0);
+
+            if (light->isReady())
+                light->setBrightness(25);
+        }
+
+        if (line == "B" && !AvahiBrowser::getInstance().getLights().empty()) {
+            auto light = AvahiBrowser::getInstance().getLights().at(0);
+
+            if (light->isReady())
+                light->setBrightness(100);
+        }
+
+        if (line == "t" && !AvahiBrowser::getInstance().getLights().empty()) {
+            auto light = AvahiBrowser::getInstance().getLights().at(0);
+
+            if (light->isReady())
+                light->setTemperature(4000);
+        }
+
+        if (line == "T" && !AvahiBrowser::getInstance().getLights().empty()) {
+            auto light = AvahiBrowser::getInstance().getLights().at(0);
+
+            if (light->isReady())
+                light->setTemperature(7000);
         }
 
         std::getline(std::cin, line);
