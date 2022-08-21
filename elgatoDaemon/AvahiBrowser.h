@@ -37,6 +37,21 @@
 
 #include "ElgatoLight.h"
 
+enum class AvahiBrowserEventType {
+    LIGHT_ADDED,
+    LIGHT_REMOVED
+};
+
+struct AvahiBrowserEventArgs {
+    AvahiBrowserEventArgs(AvahiBrowserEventType type, std::string name) : _type(type), _name(std::move(name)) { }
+
+    [[nodiscard]] AvahiBrowserEventType type() const { return _type; }
+    [[nodiscard]] std::string name() const { return _name; }
+
+private:
+    AvahiBrowserEventType _type;
+    std::string _name;
+};
 
 class AvahiBrowser {
 public:
@@ -47,11 +62,12 @@ public:
 
     AvahiBrowser(const AvahiBrowser&) = delete;
     AvahiBrowser& operator=(const AvahiBrowser&) = delete;
-
     std::vector<std::shared_ptr<ElgatoLight>> getLights() { return _lights; }
 
     void start();
     void restart();
+
+    void registerCallback(const std::function<void(const AvahiBrowserEventArgs&)>&);
 private:
     AvahiBrowser() = default;
 
@@ -64,10 +80,13 @@ private:
     static void threadStart();
     void cleanUp();
 
-    void addIfUnknown(std::shared_ptr<ElgatoLight>& light);
-    void removeByName(std::string name);
+    void addIfUnknown(std::shared_ptr<ElgatoLight>&);
+    void removeByName(std::string);
 
-    std::vector<std::shared_ptr<ElgatoLight>> _lights;
+    void notifyObservers(const AvahiBrowserEventArgs&);
+
+    std::vector<std::shared_ptr<ElgatoLight>> _lights = {};
+    std::vector<std::function<void(const AvahiBrowserEventArgs&)>> _callbacks = {};
 
     std::thread* _workerThread = nullptr;
     AvahiSimplePoll* _simple_poll = nullptr;

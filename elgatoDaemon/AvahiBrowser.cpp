@@ -33,6 +33,7 @@
 
 #include <avahi-common/error.h>
 #include <thread>
+#include <future>
 
 void AvahiBrowser::resolveCallback(AvahiServiceResolver* resolver, AvahiIfIndex interface, AvahiProtocol protocol,
                                    AvahiResolverEvent event, const char* name, const char* type, const char* domain,
@@ -78,6 +79,8 @@ void AvahiBrowser::browseCallback(AvahiServiceBrowser* browser, AvahiIfIndex int
             break;
         case AVAHI_BROWSER_REMOVE:
             getInstance().removeByName(name);
+            AvahiBrowser::getInstance().notifyObservers({ AvahiBrowserEventType::LIGHT_REMOVED, name});
+
             break;
         case AVAHI_BROWSER_CACHE_EXHAUSTED:
         case AVAHI_BROWSER_ALL_FOR_NOW:
@@ -131,8 +134,10 @@ void AvahiBrowser::addIfUnknown(std::shared_ptr<ElgatoLight>& light) {
         return item->name() == light->name();
     });
 
-    if (item == _lights.end())
+    if (item == _lights.end()) {
         _lights.push_back(light);
+        notifyObservers({AvahiBrowserEventType::LIGHT_ADDED, light->name()});
+    }
 }
 
 void AvahiBrowser::removeByName(std::string name) {
@@ -162,4 +167,18 @@ void AvahiBrowser::start() {
 void AvahiBrowser::restart() {
     cleanUp();
     start();
+}
+
+void AvahiBrowser::registerCallback(const std::function<void(const AvahiBrowserEventArgs&)>& functor) {
+    _callbacks.push_back(functor);
+}
+
+void AvahiBrowser::notifyObservers(const AvahiBrowserEventArgs& args) {
+    if (_callbacks.empty()) return;
+
+    std::async(std::launch::async, [args, this]{
+        for(const auto& callback : _callbacks) {
+            callback(args);
+        }
+    });
 }
