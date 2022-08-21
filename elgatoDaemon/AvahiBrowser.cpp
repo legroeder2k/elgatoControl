@@ -60,7 +60,7 @@ void AvahiBrowser::resolveCallback(AvahiServiceResolver* resolver, AvahiIfIndex 
 void AvahiBrowser::browseCallback(AvahiServiceBrowser* browser, AvahiIfIndex interface, AvahiProtocol protocol,
                                   AvahiBrowserEvent event, const char* name, const char* type, const char * domain,
                                   AvahiLookupResultFlags flags, void* userdata) {
-    AvahiClient *client = (AvahiClient*) userdata;
+    auto *client = (AvahiClient*) userdata;
     assert(browser);
 
     switch(event) {
@@ -76,6 +76,9 @@ void AvahiBrowser::browseCallback(AvahiServiceBrowser* browser, AvahiIfIndex int
             break;
         case AVAHI_BROWSER_REMOVE:
             getInstance().removeByName(name);
+            break;
+        case AVAHI_BROWSER_CACHE_EXHAUSTED:
+        case AVAHI_BROWSER_ALL_FOR_NOW:
             break;
     }
 }
