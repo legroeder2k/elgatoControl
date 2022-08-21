@@ -68,6 +68,7 @@ public:
     void restart();
 
     void registerCallback(const std::function<void(const AvahiBrowserEventArgs&)>&);
+    std::shared_ptr<ElgatoLight> findByName(const std::string& name);
 private:
     AvahiBrowser() = default;
 

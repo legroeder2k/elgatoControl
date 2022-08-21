@@ -34,6 +34,7 @@
 #include <avahi-common/error.h>
 #include <thread>
 #include <future>
+#include <regex>
 
 void AvahiBrowser::resolveCallback(AvahiServiceResolver* resolver, [[maybe_unused]] AvahiIfIndex interface,
                                    [[maybe_unused]]AvahiProtocol protocol, AvahiResolverEvent event, const char* name,
@@ -147,6 +148,18 @@ void AvahiBrowser::removeByName(std::string name) {
                            [name](const std::shared_ptr<ElgatoLight>& item) {
                 return item->name() == name;
             }), _lights.end());
+}
+
+std::shared_ptr<ElgatoLight> AvahiBrowser::findByName(const std::string &regexPattern) {
+    auto item = std::find_if(_lights.begin(), _lights.end(), [regexPattern](const auto& item) {
+        const std::regex pattern(regexPattern);
+        return std::regex_search(item->name(), pattern);
+    });
+
+    if (item == _lights.end())
+        return nullptr;
+
+    return *item;
 }
 
 void AvahiBrowser::cleanUp() {
