@@ -118,7 +118,7 @@ bool ElgatoLight::sendRequest(const std::string& requestBody) {
         _stateInfo = std::make_shared<ElgatoStateInfo>(json::parse(resString).get<ElgatoStateInfo>() );
 
         std::clog << kLogDebug << "(ElgatoLight) response: " << resString << std::endl;
-        notifyObservers({name()});
+        notifyObservers(ElgatoStateChangedEventArgs{name()});
 
         return true;
     } catch (const std::exception& e) {

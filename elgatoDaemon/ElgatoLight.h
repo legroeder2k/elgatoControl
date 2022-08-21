@@ -108,8 +108,7 @@ private:
 
 class ElgatoStateChangedEventArgs final {
 public:
-    // FIXME: This needs to be explicit... but it is not
-    ElgatoStateChangedEventArgs(std::string name) : _name(std::move(name)) { }
+    explicit ElgatoStateChangedEventArgs(std::string name) : _name(std::move(name)) { }
 
     std::string name() { return _name; }
 
