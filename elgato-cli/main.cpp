@@ -24,14 +24,99 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdio.h>
+#include <getopt.h>
+#include <fmt/core.h>
+
 #include "../Config.h"
 #include "ElgatoClient.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
-    auto channel = ElgatoClient::createChannel(SOCKET_FILE);
+    static const struct option long_options[] = {
+            { "list",       optional_argument,nullptr,'l' },
+            { "refresh",    optional_argument,nullptr,'r' },
+            { "name",       optional_argument,nullptr,'n' },
+            { "powerOn",    optional_argument,nullptr,'o' },
+            { "powerOff",   optional_argument,nullptr,'O' },
+            { "help",       optional_argument,nullptr,'h' }
+    };
 
+    bool listMode = false;
+    bool refresh = false;
+    std::string nameOfLight = "";
+    bool powerOn = false;
+    bool powerOff = false;
+    bool showLongHelp = false;
+    bool showShortHelp = false;
+
+    while(1) {
+        int index = -1;
+        auto result = getopt_long(argc, argv, "lnoOh", long_options, &index);
+        if (result == -1) break;
+
+        switch(result) {
+            case 'l':
+                listMode = true;
+                break;
+            case 'r':
+                refresh = true;
+                break;
+            case 'n':
+                if (optarg)
+                    nameOfLight = std::string(optarg);
+                break;
+            case 'o':
+                powerOn = true;
+                powerOff = false;
+                break;
+            case 'O':
+                powerOn = false;
+                powerOff = true;
+                break;
+            case 'h':
+                showLongHelp = true;
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (!listMode && !refresh && !powerOn && !powerOff && !showLongHelp)
+        showShortHelp = true;
+
+    if (!showShortHelp && !showLongHelp && nameOfLight.empty())
+        showShortHelp = true;
+
+    if (showShortHelp) {
+        fmt::print("Usage: {} --name=\"<name>\" <OPTIONEN>\n", argv[0]);
+        fmt::print("Try '{} --help' for more informations.\n", argv[0]);
+
+        return 0;
+    }
+
+    if (showLongHelp) {
+        fmt::print("Usage: {} <OPTIONEN>\n", argv[0]);
+        fmt::print("Send a command to the elgatoDaemon.\n");
+        fmt::print("Example: {} --name=\"*\" --powerOn\n\n", argv[0]);
+
+        fmt::print("Generic functions:\n");
+        fmt::print(" -l, --list\t\tLists all discoverd lights with some basic informations\n");
+        fmt::print(" -r, --refresh\t\tAsks the daemon to refresh the list of lights discoverd\n");
+        fmt::print(" -h, --help\t\tPrints out this help\n\n");
+
+        fmt::print("Fixture functions: (These all need a specified fixture using --name)\n");
+        fmt::print("  --name=NAME\t\tSpecifies the name of the fixture (not display name) the following command acts on.\n\t\t\tCan be a regex to match multiple fixtures and a single asterisk will be replaced to match all.\n");
+        fmt::print("  -o, --powerOn\t\tTurns the selected fixture(s) on at the last power setting\n");
+        fmt::print("  -O, --powerOff\tTurns the selected fixture(s) off\n");
+
+        return 0;
+    }
+
+    // At this point we should know what to do :)
+    auto channel = ElgatoClient::createChannel(SOCKET_FILE);
     ElgatoClient client(channel);
-    client.SayHello("Sandra");
+
+
 
     return 0;
 }
