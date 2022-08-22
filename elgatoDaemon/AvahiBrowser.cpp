@@ -150,7 +150,7 @@ void AvahiBrowser::removeByName(std::string name) {
             }), _lights.end());
 }
 
-std::shared_ptr<ElgatoLight> AvahiBrowser::findByName(const std::string &regexPattern) {
+std::shared_ptr<ElgatoLight> AvahiBrowser::firstByName(const std::string &regexPattern) {
     auto item = std::find_if(_lights.begin(), _lights.end(), [regexPattern](const auto& item) {
         const std::regex pattern(regexPattern);
         return std::regex_search(item->name(), pattern);
@@ -160,6 +160,18 @@ std::shared_ptr<ElgatoLight> AvahiBrowser::findByName(const std::string &regexPa
         return nullptr;
 
     return *item;
+}
+
+std::vector<std::shared_ptr<ElgatoLight>> AvahiBrowser::allByName(const std::string &regexPattern) {
+    std::vector<std::shared_ptr<ElgatoLight>> target;
+    const std::regex pattern(regexPattern == "*" ? "." : regexPattern);
+
+    for(auto& item : _lights){
+        if (std::regex_search(item->name(), pattern))
+            target.push_back(item);
+    }
+
+    return target;
 }
 
 void AvahiBrowser::cleanUp() {
