@@ -1,0 +1,12 @@
+[Unit]
+Description=Service for communicating with Elgato Accessories like the Key lights
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=[INSTALL_DIR]/bin/elgatoDaemon
+
+[Install]
+WantedBy=default.target

@@ -1,2 +1,3 @@
 cmake-build-debug/*
 Config.h
+additional/elgatoDaemon.service

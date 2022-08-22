@@ -17,6 +17,31 @@ Configure the build with cmake
 
 `cmake -DCMAKE_BUILD_TYPE=Release -GNinja ..`
 
-And compile
+The default Install prefix CMAKE_INSTALL_PREFIX will be ~/.local<br/>
+And start the compilation:
 
 `ninja`
+
+After compilation install with:
+
+`ninja install`
+
+And enable and start the daemon:
+
+`systemctl --user enable elgatoDaemon`<br/>
+`systemctl --user start elgatoDaemon`
+
+And enjoy :)
+
+Keep the install_manifest.txt
+
+## Uninstall
+
+Disable the daemon
+
+`systemctl --user stop elgatoDaemon`<br />
+`systemctl --user disable elgatoDaemon`
+
+Then you can remove all installed files:
+
+`xargs rm < install_manifest.txt`
