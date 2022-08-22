@@ -32,27 +32,11 @@ using ::grpc::ClientContext;
 using ::grpc::CreateChannel;
 using ::grpc::Status;
 
-std::shared_ptr<Channel> ElgatoClient::createChannel(std::string address) {
+std::shared_ptr<Channel> ElgatoClient::createChannel(const std::string& address) {
     auto realPath = expand_with_environment(address);
     auto channelAddress = "unix://" + realPath;
 
     return grpc::CreateChannel(channelAddress, grpc::InsecureChannelCredentials());
-}
-
-void ElgatoClient::SayHello(std::string name) {
-    HelloRequest request;
-    HelloReply reply;
-    ClientContext context;
-
-    request.set_name(name);
-
-    auto status = _stub->SayHello(&context, request, &reply);
-
-    if (!status.ok()) {
-        std::cout << "SayHello rpc failed." << std::endl;
-    } else {
-        std::cout << "SayHello rpc: " << reply.message() << std::endl;
-    }
 }
 
 std::string ElgatoClient::expand_with_environment(const std::string &s) {

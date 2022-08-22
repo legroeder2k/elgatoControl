@@ -38,10 +38,9 @@ using grpc::Channel;
 
 class ElgatoClient {
 public:
-    explicit ElgatoClient(std::shared_ptr<Channel> channel) : _stub(Elgato::NewStub(channel)) { }
-    static std::shared_ptr<Channel> createChannel(std::string address);
+    explicit ElgatoClient(const std::shared_ptr<Channel>& channel) : _stub(Elgato::NewStub(channel)) { }
+    static std::shared_ptr<Channel> createChannel(const std::string& address);
 
-    void SayHello(std::string name);
 private:
     static std::string expand_with_environment( const std::string &s );
     std::unique_ptr<Elgato::Stub> _stub;

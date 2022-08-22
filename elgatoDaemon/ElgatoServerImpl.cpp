@@ -39,14 +39,10 @@ using ::grpc::Status;
 using ::grpc::Server;
 using ::grpc::ServerBuilder;
 using ::grpc::ServerContext;
-using ::HelloRequest;
-using ::HelloReply;
-
-Status ElgatoServerImpl::SayHello([[maybe_unused]] ServerContext *context, const HelloRequest *request,
-                                      HelloReply *response) {
-    response->set_message("Hello, " + request->name());
-    return Status::OK;
-}
+using ::Fixture;
+using ::FixtureList;
+using ::SimpleCliRequest;
+using ::SimpleCliResponse;
 
 void ElgatoServerImpl::RunServer(const std::string& socketPath) {
     auto server_address = "unix://" + expand_with_environment(socketPath);

@@ -33,10 +33,6 @@
 class ElgatoServerImpl final : public Elgato::Service {
 public:
     void RunServer(const std::string&);
-
-    ::grpc::Status SayHello(::grpc::ServerContext *context, const ::HelloRequest *request,
-                        ::HelloReply *response) override;
-
 private:
     static std::string expand_with_environment( const std::string &s );
 };
