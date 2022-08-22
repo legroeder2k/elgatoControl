@@ -33,6 +33,12 @@
 class ElgatoServerImpl final : public Elgato::Service {
 public:
     void RunServer(const std::string&);
+
+    ::grpc::Status ListFixtures(::grpc::ServerContext*, const Empty*, FixtureList*) override;
+    ::grpc::Status Refresh(::grpc::ServerContext*, const Empty*, SimpleCliResponse*) override;
+
+    ::grpc::Status PowerOn(::grpc::ServerContext*, const SimpleCliRequest*, SimpleCliResponse*) override;
+    ::grpc::Status PowerOff(::grpc::ServerContext*, const SimpleCliRequest*, SimpleCliResponse*) override;
 private:
     static std::string expand_with_environment( const std::string &s );
 };

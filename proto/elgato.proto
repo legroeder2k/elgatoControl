@@ -14,12 +14,13 @@ message FixtureList {
 
 message Fixture {
   string name = 1;
-  string displayName = 2;
-  string productName = 3;
-  string serialNumber = 4;
-  bool powerState = 5;
-  int32 brightness = 6;
-  int32 temperature = 7;
+  bool isReady = 2;
+  string displayName = 3;
+  string productName = 4;
+  string serialNumber = 5;
+  bool powerState = 6;
+  int32 brightness = 7;
+  int32 temperature = 8;
 }
 
 message SimpleCliRequest {

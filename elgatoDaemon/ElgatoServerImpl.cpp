@@ -33,6 +33,7 @@
 
 #include "ElgatoServerImpl.h"
 #include "Log.h"
+#include "AvahiBrowser.h"
 
 
 using ::grpc::Status;
@@ -74,4 +75,50 @@ std::string ElgatoServerImpl::expand_with_environment(const std::string &s) {
     if ( v != NULL ) value = std::string( v );
 
     return expand_with_environment(pre + value + post);
+}
+
+Status ElgatoServerImpl::ListFixtures([[maybe_unused]] ServerContext* _, [[maybe_unused]] const Empty* empty, [[maybe_unused]] FixtureList* fixtureList) {
+    for(auto& light : AvahiBrowser::getInstance().getLights()) {
+        auto newFix = fixtureList->add_fixtures();
+        newFix->set_name(light->name());
+
+        if (light->isReady())
+        {
+            newFix->set_isready(true);
+            newFix->set_displayname(light->deviceInfo()->displayName);
+            newFix->set_productname(light->deviceInfo()->productName);
+            newFix->set_serialnumber(light->deviceInfo()->serialNumber);
+            newFix->set_powerstate(light->deviceState()->on == 1);
+            newFix->set_brightness(light->deviceState()->brightness);
+            newFix->set_temperature(ElgatoLight::colorFromElgato(light->deviceState()->temperature));
+        }
+    }
+
+    return Status::OK;
+}
+
+Status ElgatoServerImpl::Refresh([[maybe_unused]] ServerContext* _, [[maybe_unused]] const Empty* empty, SimpleCliResponse* response) {
+    AvahiBrowser::getInstance().restart();
+    response->set_successful(true);
+    return Status::OK;
+}
+
+Status ElgatoServerImpl::PowerOn([[maybe_unused]] ServerContext* _, [[maybe_unused]] const SimpleCliRequest* request, SimpleCliResponse* response ) {
+    for(auto& light : AvahiBrowser::getInstance().allByName(request->fixturefilter())) {
+        if (light->isReady())
+            light->powerOn();
+    }
+
+    response->set_successful(true);
+    return Status::OK;
+}
+
+Status ElgatoServerImpl::PowerOff([[maybe_unused]] ServerContext* _, [[maybe_unused]] const SimpleCliRequest* request, SimpleCliResponse* response ) {
+    for(auto& light : AvahiBrowser::getInstance().allByName(request->fixturefilter())) {
+        if (light->isReady())
+            light->powerOff();
+    }
+
+    response->set_successful(true);
+    return Status::OK;
 }

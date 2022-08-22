@@ -27,6 +27,7 @@
 #include "ElgatoClient.h"
 
 #include <grpcpp/create_channel.h>
+#include <fmt/core.h>
 
 using ::grpc::ClientContext;
 using ::grpc::CreateChannel;
@@ -54,4 +55,65 @@ std::string ElgatoClient::expand_with_environment(const std::string &s) {
     if ( v != NULL ) value = std::string( v );
 
     return expand_with_environment(pre + value + post);
+}
+
+void ElgatoClient::listFixtures() {
+    Empty empty;
+    FixtureList fixtureList;
+    ClientContext context;
+
+    _stub->ListFixtures(&context, empty, &fixtureList);
+
+    for(auto& fixture : fixtureList.fixtures()) {
+        fmt::print("  {} ({}) is {} with s/n {} (Power {} @ {}%, {}K)\n", fixture.name(), fixture.displayname(), fixture.productname(), fixture.serialnumber(), fixture.powerstate() ? "on" : "off", fixture.brightness(), fixture.temperature());
+    }
+}
+
+void ElgatoClient::refreshBrowser() {
+    ClientContext context;
+    Empty empty;
+    SimpleCliResponse response;
+
+    fmt::print("Refreshing fixture list...");
+
+    auto status = _stub->Refresh(&context, empty, &response);
+
+    if (status.ok() && response.successful())
+        fmt::print(" OK\n");
+    else
+        fmt::print(" Error!\n");
+}
+
+void ElgatoClient::powerOn(const std::string& fixtureFilter) {
+    ClientContext context;
+    SimpleCliRequest request;
+    SimpleCliResponse response;
+
+    request.set_fixturefilter(fixtureFilter);
+
+    fmt::print("Sending Power on request: ");
+
+    auto status = _stub->PowerOn(&context, request, &response);
+
+    if (status.ok() && response.successful())
+        fmt::print(" OK\n");
+    else
+        fmt::print(" Error!\n");
+}
+
+void ElgatoClient::powerOff(const std::string& fixtureFilter) {
+    ClientContext context;
+    SimpleCliRequest request;
+    SimpleCliResponse response;
+
+    request.set_fixturefilter(fixtureFilter);
+
+    fmt::print("Sending Power off request: ");
+
+    auto status = _stub->PowerOff(&context, request, &response);
+
+    if (status.ok() && response.successful())
+        fmt::print(" OK\n");
+    else
+        fmt::print(" Error!\n");
 }

@@ -84,7 +84,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     if (!listMode && !refresh && !powerOn && !powerOff && !showLongHelp)
         showShortHelp = true;
 
-    if (!showShortHelp && !showLongHelp && nameOfLight.empty())
+    if (!listMode && !refresh && !showShortHelp && !showLongHelp && nameOfLight.empty())
         showShortHelp = true;
 
     if (showShortHelp) {
@@ -116,7 +116,27 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     auto channel = ElgatoClient::createChannel(SOCKET_FILE);
     ElgatoClient client(channel);
 
+    if (listMode) {
+        fmt::print("Discovered fixtures:\n");
+        client.listFixtures();
 
+        return 0;
+    }
+
+    if (refresh) {
+        client.refreshBrowser();
+        return 0;
+    }
+
+    if (powerOn) {
+        client.powerOn(nameOfLight);
+        return 0;
+    }
+
+    if (powerOff) {
+        client.powerOff(nameOfLight);
+        return 0;
+    }
 
     return 0;
 }
