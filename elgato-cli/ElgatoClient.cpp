@@ -117,3 +117,39 @@ void ElgatoClient::powerOff(const std::string& fixtureFilter) {
     else
         fmt::print(" Error!\n");
 }
+
+void ElgatoClient::setBrightness(const std::string& fixtureFilter, long newValue) {
+    ClientContext context;
+    Int32CliRequest request;
+    SimpleCliResponse response;
+
+    request.set_fixturefilter(fixtureFilter);
+    request.set_newvalue(newValue);
+
+    fmt::print("Setting fixtures to {} brightness: ", newValue);
+
+    auto status = _stub->SetBrightness(&context, request, &response);
+
+    if (status.ok() && response.successful())
+        fmt::print(" OK\n");
+    else
+        fmt::print(" Error!\n");
+}
+
+void ElgatoClient::setTemperature(const std::string& fixtureFilter, long newValue) {
+    ClientContext context;
+    Int32CliRequest request;
+    SimpleCliResponse response;
+
+    request.set_fixturefilter(fixtureFilter);
+    request.set_newvalue(newValue);
+
+    fmt::print("Setting fixtures to a color temp of {}K: ", newValue);
+
+    auto status = _stub->SetTemperature(&context, request, &response);
+
+    if (status.ok() && response.successful())
+        fmt::print(" OK\n");
+    else
+        fmt::print(" Error!\n");
+}

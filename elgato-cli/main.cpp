@@ -38,6 +38,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
             { "name",       optional_argument,nullptr,'n' },
             { "powerOn",    optional_argument,nullptr,'o' },
             { "powerOff",   optional_argument,nullptr,'O' },
+            { "brightness", optional_argument,nullptr,'b' },
+            { "temperature",optional_argument,nullptr,'t' },
             { "help",       optional_argument,nullptr,'h' }
     };
 
@@ -46,6 +48,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     std::string nameOfLight = "";
     bool powerOn = false;
     bool powerOff = false;
+    bool setBrightness = false;
+    long brightness = 0;
+    bool setTemperature = false;
+    long temperature = 0;
     bool showLongHelp = false;
     bool showShortHelp = false;
 
@@ -76,15 +82,36 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
             case 'h':
                 showLongHelp = true;
                 break;
+            case 'b':
+                if (optarg) {
+                    setBrightness = true;
+                    brightness = strtol(optarg, nullptr, 10);
+
+                    if(brightness == 0)
+                        setBrightness = false;
+                }
+                break;
+            case 't':
+                if (optarg) {
+                    setTemperature = true;
+                    temperature = strtol(optarg, nullptr, 10);
+
+                    if(temperature == 0)
+                        setTemperature = false;
+                }
+                break;
             default:
                 break;
         }
     }
 
-    if (!listMode && !refresh && !powerOn && !powerOff && !showLongHelp)
+    if (!listMode && !refresh && !powerOn && !powerOff && !showLongHelp && !setBrightness && !setTemperature)
         showShortHelp = true;
 
     if (!listMode && !refresh && !showShortHelp && !showLongHelp && nameOfLight.empty())
+        showShortHelp = true;
+
+    if (!nameOfLight.empty() && !powerOn && !powerOff && !showLongHelp && !setBrightness && !setTemperature)
         showShortHelp = true;
 
     if (showShortHelp) {
@@ -108,6 +135,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
         fmt::print("  --name=NAME\t\tSpecifies the name of the fixture (not display name) the following command acts on.\n\t\t\tCan be a regex to match multiple fixtures and a single asterisk will be replaced to match all.\n");
         fmt::print("  -o, --powerOn\t\tTurns the selected fixture(s) on at the last power setting\n");
         fmt::print("  -O, --powerOff\tTurns the selected fixture(s) off\n");
+        fmt::print("  --brightness=VALUE\tSet the brightness to a value between 0 - 100\n");
+        fmt::print("  --temperature=VALUE\tSet the color temperature to a value between 2900K and 7000K\n");
 
         return 0;
     }
@@ -130,12 +159,18 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
     if (powerOn) {
         client.powerOn(nameOfLight);
-        return 0;
     }
 
     if (powerOff) {
         client.powerOff(nameOfLight);
-        return 0;
+    }
+
+    if (setBrightness) {
+        client.setBrightness(nameOfLight, brightness);
+    }
+
+    if (setTemperature) {
+        client.setTemperature(nameOfLight, temperature);
     }
 
     return 0;

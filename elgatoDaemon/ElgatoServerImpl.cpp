@@ -122,3 +122,23 @@ Status ElgatoServerImpl::PowerOff([[maybe_unused]] ServerContext* _, [[maybe_unu
     response->set_successful(true);
     return Status::OK;
 }
+
+Status ElgatoServerImpl::SetBrightness([[maybe_unused]] ServerContext* _, const Int32CliRequest* request, SimpleCliResponse* response) {
+    for(auto& light : AvahiBrowser::getInstance().allByName(request->fixturefilter())) {
+        if (light->isReady())
+            light->setBrightness(request->newvalue());
+    }
+
+    response->set_successful(true);
+    return Status::OK;
+}
+
+Status ElgatoServerImpl::SetTemperature([[maybe_unused]] ServerContext* _, const Int32CliRequest* request, SimpleCliResponse* response) {
+    for(auto& light : AvahiBrowser::getInstance().allByName(request->fixturefilter())) {
+        if (light->isReady())
+            light->setTemperature(request->newvalue());
+    }
+
+    response->set_successful(true);
+    return Status::OK;
+}

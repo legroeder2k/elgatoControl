@@ -39,6 +39,8 @@ public:
 
     ::grpc::Status PowerOn(::grpc::ServerContext*, const SimpleCliRequest*, SimpleCliResponse*) override;
     ::grpc::Status PowerOff(::grpc::ServerContext*, const SimpleCliRequest*, SimpleCliResponse*) override;
+    ::grpc::Status SetBrightness(::grpc::ServerContext*, const Int32CliRequest*, SimpleCliResponse*) override;
+    ::grpc::Status SetTemperature(::grpc::ServerContext*, const Int32CliRequest*, SimpleCliResponse*) override;
 private:
     static std::string expand_with_environment( const std::string &s );
 };

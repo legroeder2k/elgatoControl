@@ -6,6 +6,8 @@ service Elgato {
 
   rpc PowerOn(SimpleCliRequest) returns (SimpleCliResponse);
   rpc PowerOff(SimpleCliRequest) returns (SimpleCliResponse);
+  rpc SetBrightness(Int32CliRequest) returns (SimpleCliResponse);
+  rpc SetTemperature(Int32CliRequest) returns (SimpleCliResponse);
 }
 
 message FixtureList {
@@ -21,6 +23,11 @@ message Fixture {
   bool powerState = 6;
   int32 brightness = 7;
   int32 temperature = 8;
+}
+
+message Int32CliRequest {
+  string fixtureFilter = 1;
+  uint32 newValue = 2;
 }
 
 message SimpleCliRequest {

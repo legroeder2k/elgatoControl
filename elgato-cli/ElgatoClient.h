@@ -46,6 +46,8 @@ public:
 
     void powerOn(const std::string&);
     void powerOff(const std::string&);
+    void setBrightness(const std::string&, long);
+    void setTemperature(const std::string&, long);
 
 private:
     static std::string expand_with_environment( const std::string &s );
