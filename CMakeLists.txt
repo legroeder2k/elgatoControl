@@ -29,6 +29,7 @@ configure_file(${CMAKE_SOURCE_DIR}/elgatoDaemon/Config.h.in ${CMAKE_SOURCE_DIR}/
 
 add_subdirectory(elgatoDaemon)
 add_subdirectory(elgato-cli)
+add_subdirectory(elgato-ui)
 add_subdirectory(proto)
 
 message(STATUS "Install to ${CMAKE_INSTALL_PREFIX}")
