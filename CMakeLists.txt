@@ -21,6 +21,10 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ~/.local CACHE PATH "default install path" FORCE)
 endif()
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(DEBUG_BUILD 1)
+endif()
+
 configure_file(${CMAKE_SOURCE_DIR}/elgatoDaemon/Config.h.in ${CMAKE_SOURCE_DIR}/Config.h)
 
 add_subdirectory(elgatoDaemon)

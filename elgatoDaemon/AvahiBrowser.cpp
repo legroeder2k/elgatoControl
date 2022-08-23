@@ -26,6 +26,7 @@
 
 #include "AvahiBrowser.h"
 #include "Log.h"
+#include "../Config.h"
 
 #include <algorithm>
 #include <cassert>
@@ -38,13 +39,15 @@
 
 void AvahiBrowser::resolveCallback(AvahiServiceResolver* resolver, [[maybe_unused]] AvahiIfIndex interface,
                                    [[maybe_unused]]AvahiProtocol protocol, AvahiResolverEvent event, const char* name,
-                                   const char* type, const char* domain, const char* hostname,
+                                   const char* type, const char* domain, [[maybe_unused]] const char* hostname,
                                    const AvahiAddress* address, uint16_t port,
                                    [[maybe_unused]] AvahiStringList* txt, [[maybe_unused]] AvahiLookupResultFlags flags,
                                    [[maybe_unused]] void* userdata) {
     assert(resolver);
 
+#if DEBUG_BUILD
     std::clog << kLogDebug << "Resolving device " << name << " at " << hostname << std::endl;
+#endif
 
     switch(event) {
         case AVAHI_RESOLVER_FAILURE:

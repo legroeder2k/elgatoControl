@@ -27,6 +27,7 @@
 #include "ElgatoLight.h"
 #include "HTTPRequest.hpp"
 #include "Log.h"
+#include "../Config.h"
 
 #include <arpa/inet.h>
 #include <iostream>
@@ -108,7 +109,9 @@ bool ElgatoLight::sendRequest(const std::string& requestBody) {
         auto requestString = "http://" + portString() + "/elgato/lights";
         http::Request request{requestString};
         const auto response = request.send("PUT", requestBody, {{"Content-Type", "application/json"}});
+#if DEBUG_BUILD
         std::clog << kLogDebug << "(ElgatoLight) " << requestBody << " to " << requestString << " -> " << std::to_string(response.status.code) << std::endl;
+#endif
 
         if (response.status.code != 200)
             return false;
@@ -117,7 +120,9 @@ bool ElgatoLight::sendRequest(const std::string& requestBody) {
         const auto resString = std::string{response.body.begin(), response.body.end()};
         _stateInfo = std::make_shared<ElgatoStateInfo>(json::parse(resString).get<ElgatoStateInfo>() );
 
+#if DEBUG_BUILD
         std::clog << kLogDebug << "(ElgatoLight) response: " << resString << std::endl;
+#endif
         notifyObservers(ElgatoStateChangedEventArgs{name()});
 
         return true;

@@ -28,3 +28,4 @@
 
 #cmakedefine CONFIG_PATH "@CONFIG_PATH@"
 #cmakedefine SOCKET_FILE "@SOCKET_FILE@"
+#cmakedefine01 DEBUG_BUILD
