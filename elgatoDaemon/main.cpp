@@ -14,6 +14,7 @@ int main([[maybe_unused]]int argc, [[maybe_unused]]char*argv[]) {
     ElgatoServerImpl elgatoServer;
     elgatoServer.RunServer(SOCKET_FILE);
 
+#if DEBUG_BUILD
     std::string line;
     std::cout << "Console interface:\n  q -> quit, l -> list all devices, s -> status, 1 -> on, 0 -> off, b -> 25% brightness, B -> 100% brightness, t -> 4000K temp, T -> 7000K temp" << std::endl;
     std::getline(std::cin, line);
@@ -86,6 +87,10 @@ int main([[maybe_unused]]int argc, [[maybe_unused]]char*argv[]) {
 
         std::getline(std::cin, line);
     }
+#else
+    volatile int keep_spinning = 1;
+    while(keep_spinning) { }
+#endif
 
     return 0;
 }
