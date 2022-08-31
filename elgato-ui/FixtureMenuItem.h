@@ -34,9 +34,17 @@
 
 class FixtureMenuItem final : public Gtk::MenuItem {
 public:
-    explicit FixtureMenuItem(std::shared_ptr<RemoteFixture>  fixture) : _myFixture(std::move(fixture)) {
-        set_label(_myFixture->_displayName);
-    }
+    FixtureMenuItem(std::shared_ptr<RemoteFixture>&, std::shared_ptr<ElgatoClient>&);
+
 private:
+    virtual void onPowerToggle();
+    virtual void onActivateItem();
+
     std::shared_ptr<RemoteFixture> _myFixture;
+    std::shared_ptr<ElgatoClient> _elgatoClient;
+
+    Gtk::Menu _subMenu;
+    Gtk::CheckMenuItem _powerItem;
+
+    volatile bool _inGuiUpdate = false;
 };

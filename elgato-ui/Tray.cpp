@@ -28,7 +28,8 @@
 #include "Tray.h"
 
 
-Tray::Tray(const std::shared_ptr<Channel> &channel) : _client(channel) {
+Tray::Tray(const std::shared_ptr<Channel> &channel) : _client(std::make_shared<ElgatoClient>(channel)) {
+    _fixtures = std::make_shared<std::vector<std::shared_ptr<RemoteFixture>>>();
     // FIXME: Find a nicer icon :)
     set(Gtk::Stock::JUMP_TO);
 
@@ -52,14 +53,12 @@ Tray::Tray(const std::shared_ptr<Channel> &channel) : _client(channel) {
     _quitItem.signal_activate().connect(sigc::mem_fun(*this, &Tray::on_quitItem_activated));
     _menu.append(_quitItem);
 
-    //_menu.show_all();
-
     signal_activate().connect(sigc::mem_fun(*this, &Tray::on_statusicon_activated));
     signal_popup_menu().connect(sigc::mem_fun(*this, &Tray::on_statusicon_popup));
 
     set_visible(true);
 
-    //_refreshListItem.activate();
+    _refreshListItem.activate();
 }
 
 Tray::~Tray() = default;
@@ -69,7 +68,9 @@ void Tray::on_statusicon_popup([[maybe_unused]] guint button, [[maybe_unused]] g
 }
 
 void Tray::on_statusicon_activated() {
-    std::cerr << "activated!" << std::endl;
+    for(const auto& fix : *_fixtures) {
+        std::cerr << "Fixture " << fix->_displayName << " is " << (fix->_powerState ? "on" : "off") << std::endl;
+    }
 }
 
 void Tray::on_quitItem_activated() {
@@ -82,19 +83,17 @@ void Tray::on_refreshItem_activated() {
     }
 
     _menuItems.clear();
-    _fixtures.clear();
+    _fixtures->clear();
 
-    for(const auto& fix : _client.listFixtures()) {
-
-        _fixtures.push_back(fix);
-
-        auto mItem = std::make_shared<FixtureMenuItem>(FixtureMenuItem(fix));
+    for(auto& fix : _client->listFixtures()) {
+        auto mItem = std::make_shared<FixtureMenuItem>(fix,_client);
         mItem->show();
         _menuItems.push_back(mItem);
+        _fixtures->push_back(fix);
         _menu.insert(*mItem, 2);
     }
 
-    if (_fixtures.empty()) {
+    if (_menuItems.empty()) {
         _powerOnAll.hide();
         _powerOffAll.hide();
     } else {
@@ -104,9 +103,9 @@ void Tray::on_refreshItem_activated() {
 }
 
 void Tray::on_powerOnAll_activated() {
-    _client.powerOn("*");
+    _client->powerOn("*");
 }
 
 void Tray::on_powerOffAll_activated() {
-    _client.powerOff("*");
+    _client->powerOff("*");
 }

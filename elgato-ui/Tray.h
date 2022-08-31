@@ -35,7 +35,7 @@
 
 class Tray : public Gtk::StatusIcon {
 public:
-    Tray(const std::shared_ptr<Channel>&);
+    explicit Tray(const std::shared_ptr<Channel>&);
     ~Tray() override;
 
 private:
@@ -46,14 +46,13 @@ private:
     virtual void on_powerOnAll_activated();
     virtual void on_powerOffAll_activated();
 
-
     Gtk::Menu _menu;
     Gtk::MenuItem _powerOnAll;
     Gtk::MenuItem _powerOffAll;
     Gtk::MenuItem _refreshListItem;
     Gtk::MenuItem _quitItem;
-    ElgatoClient _client;
+    std::shared_ptr<ElgatoClient> _client;
 
-    std::vector<std::shared_ptr<RemoteFixture>> _fixtures;
     std::vector<std::shared_ptr<FixtureMenuItem>> _menuItems;
+    std::shared_ptr<std::vector<std::shared_ptr<RemoteFixture>>> _fixtures;
 };

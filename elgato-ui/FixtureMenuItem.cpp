@@ -25,3 +25,42 @@
  */
 
 #include "FixtureMenuItem.h"
+
+#include <utility>
+
+FixtureMenuItem::FixtureMenuItem(std::shared_ptr<RemoteFixture> &fixture, std::shared_ptr<ElgatoClient> &elgatoClient)
+    : _myFixture(fixture), _elgatoClient(elgatoClient)
+{
+    set_label(_myFixture->_displayName);
+
+    _powerItem.set_label("Power");
+    _powerItem.signal_activate().connect(sigc::mem_fun(*this, &FixtureMenuItem::onPowerToggle));
+
+    _subMenu.append(_powerItem);
+
+    _subMenu.show_all();
+    set_submenu(_subMenu);
+
+    signal_activate().connect(sigc::mem_fun(*this, &FixtureMenuItem::onActivateItem));
+}
+
+void FixtureMenuItem::onPowerToggle() {
+    if (_inGuiUpdate) return;
+
+    if (_myFixture->_powerState) {
+        if (_elgatoClient->powerOff(_myFixture->_name))
+            _myFixture->_powerState = false;
+
+    } else {
+        if (_elgatoClient->powerOn(_myFixture->_name))
+            _myFixture->_powerState = true;
+    }
+}
+
+void FixtureMenuItem::onActivateItem() {
+    // update the power checkbox to the correct value
+
+    _inGuiUpdate = true;
+    _powerItem.set_active(_myFixture->_powerState);
+    _inGuiUpdate = false;
+}
