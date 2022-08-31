@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Sascha Huck <sascha@wirrewelt.de>
+ * Copyright (c) 2022, Sascha Huck <sascha@wirrewelt.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
