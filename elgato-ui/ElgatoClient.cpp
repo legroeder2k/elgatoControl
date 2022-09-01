@@ -98,3 +98,30 @@ bool ElgatoClient::powerOff(std::string fixtureFilter) {
     return status.ok() && response.successful();
 }
 
+bool ElgatoClient::setBrightness(std::string fixtureFilter, uint32_t brightness) {
+    Int32CliRequest request;
+    SimpleCliResponse response;
+    ClientContext context;
+
+    request.set_fixturefilter(fixtureFilter);
+    request.set_newvalue(brightness);
+
+    auto status = _stub->SetBrightness(&context, request, &response);
+
+    return status.ok() && response.successful();
+}
+
+bool ElgatoClient::setColorTemp(std::string fixtureFilter, uint32_t colorTemp)
+{
+    Int32CliRequest request;
+    SimpleCliResponse response;
+    ClientContext context;
+
+    request.set_fixturefilter(fixtureFilter);
+    request.set_newvalue(colorTemp);
+
+    auto status = _stub->SetTemperature(&context, request, &response);
+
+    return status.ok() && response.successful();
+}
+

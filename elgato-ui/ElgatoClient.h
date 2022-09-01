@@ -68,6 +68,8 @@ public:
 
     bool powerOn(std::string);
     bool powerOff(std::string);
+    bool setBrightness(std::string, uint32_t);
+    bool setColorTemp(std::string, uint32_t);
 private:
     static std::string expand_with_environment(const std::string& );
     std::unique_ptr<Elgato::Stub> _stub;

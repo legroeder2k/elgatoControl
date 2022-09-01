@@ -28,11 +28,11 @@
 #include "Tray.h"
 
 
-Tray::Tray(const std::shared_ptr<Channel> &channel) : _client(std::make_shared<ElgatoClient>(channel)) {
-    _fixtures = std::make_shared<std::vector<std::shared_ptr<RemoteFixture>>>();
-    // FIXME: Find a nicer icon :)
-    set(Gtk::Stock::JUMP_TO);
-
+Tray::Tray(const std::shared_ptr<Channel> &channel)
+    : _client(std::make_shared<ElgatoClient>(channel)),
+      _fixtures(std::make_shared<std::vector<std::shared_ptr<RemoteFixture>>>()),
+      _settingsWindow(SettingsWindow(_fixtures, _client))
+{
     _powerOnAll.set_label("All on");
     _powerOnAll.hide();
     _powerOnAll.signal_activate().connect(sigc::mem_fun(*this, &Tray::on_powerOnAll_activated));
@@ -68,9 +68,10 @@ void Tray::on_statusicon_popup([[maybe_unused]] guint button, [[maybe_unused]] g
 }
 
 void Tray::on_statusicon_activated() {
-    for(const auto& fix : *_fixtures) {
-        std::cerr << "Fixture " << fix->_displayName << " is " << (fix->_powerState ? "on" : "off") << std::endl;
-    }
+    if (_settingsWindow.is_visible())
+        _settingsWindow.present();
+    else
+        _settingsWindow.show();
 }
 
 void Tray::on_quitItem_activated() {
@@ -100,6 +101,8 @@ void Tray::on_refreshItem_activated() {
         _powerOnAll.show();
         _powerOffAll.show();
     }
+
+    _settingsWindow.refreshFixtures();
 }
 
 void Tray::on_powerOnAll_activated() {

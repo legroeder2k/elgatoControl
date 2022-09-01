@@ -1,5 +1,5 @@
 set (UI_SOURCES
-        main.cpp Tray.cpp ElgatoClient.cpp FixtureMenuItem.cpp FixtureMenuItem.h)
+        main.cpp Tray.cpp ElgatoClient.cpp FixtureMenuItem.cpp SettingsWindow.cpp)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 add_compile_options(-Wall -Wextra -pedantic -Werror)

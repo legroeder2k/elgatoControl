@@ -28,34 +28,46 @@
 #pragma once
 
 #include <gtkmm.h>
-#include <unistd.h>
 
-#include "SettingsWindow.h"
 #include "ElgatoClient.h"
-#include "FixtureMenuItem.h"
 
-class Tray : public Gtk::StatusIcon {
+class FixtureItem : public Gtk::Frame {
 public:
-    explicit Tray(const std::shared_ptr<Channel>&);
-    ~Tray() override;
+    FixtureItem(std::shared_ptr<RemoteFixture>&, std::shared_ptr<ElgatoClient>&);
+
+protected:
+    virtual void onPowerToggle();
+    virtual void onColorTempChanged();
+    virtual void onBrightnessChanged();
 
 private:
-    virtual void on_statusicon_popup(guint, guint);
-    virtual void on_statusicon_activated();
-    virtual void on_quitItem_activated();
-    virtual void on_refreshItem_activated();
-    virtual void on_powerOnAll_activated();
-    virtual void on_powerOffAll_activated();
-
-    Gtk::Menu _menu;
-    Gtk::MenuItem _powerOnAll;
-    Gtk::MenuItem _powerOffAll;
-    Gtk::MenuItem _refreshListItem;
-    Gtk::MenuItem _quitItem;
+    std::shared_ptr<RemoteFixture> _fixture;
     std::shared_ptr<ElgatoClient> _client;
 
-    std::vector<std::shared_ptr<FixtureMenuItem>> _menuItems;
-    std::shared_ptr<std::vector<std::shared_ptr<RemoteFixture>>> _fixtures;
+    Gtk::Fixed _fixedLayout;
 
-    SettingsWindow _settingsWindow;
+    Gtk::Label _titleLabel;
+    Gtk::Switch _powerButton;
+
+    Gtk::Label _colorTempLabelFront;
+    Gtk::Scale _colorTemp = Gtk::Scale(Gtk::Orientation::ORIENTATION_HORIZONTAL);
+
+    Gtk::Label _brightLabel;
+    Gtk::Scale _brightness = Gtk::Scale(Gtk::Orientation::ORIENTATION_HORIZONTAL);
+};
+
+class SettingsWindow : public Gtk::Window {
+public:
+    SettingsWindow(std::shared_ptr<std::vector<std::shared_ptr<RemoteFixture>>>&, std::shared_ptr<ElgatoClient>&);
+
+    void refreshFixtures();
+protected:
+
+private:
+    std::shared_ptr<std::vector<std::shared_ptr<RemoteFixture>>> _fixtures;
+    std::shared_ptr<ElgatoClient> _elgatoClient;
+
+    std::vector<std::shared_ptr<FixtureItem>> _children;
+
+    Gtk::Box _boxLayout;
 };
