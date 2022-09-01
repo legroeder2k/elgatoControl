@@ -28,4 +28,5 @@
 
 #cmakedefine CONFIG_PATH "@CONFIG_PATH@"
 #cmakedefine SOCKET_FILE "@SOCKET_FILE@"
+#cmakedefine CMAKE_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
 #cmakedefine01 DEBUG_BUILD

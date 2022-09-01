@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include "Tray.h"
+#include "../Config.h"
 
 
 Tray::Tray(const std::shared_ptr<Channel> &channel)
@@ -33,6 +34,9 @@ Tray::Tray(const std::shared_ptr<Channel> &channel)
       _fixtures(std::make_shared<std::vector<std::shared_ptr<RemoteFixture>>>()),
       _settingsWindow(SettingsWindow(_fixtures, _client))
 {
+    auto iconData = Gdk::Pixbuf::create_from_file(std::string(CMAKE_INSTALL_PREFIX) + "/share/elgatoControl/idea.png");
+    set(iconData);
+
     _powerOnAll.set_label("All on");
     _powerOnAll.hide();
     _powerOnAll.signal_activate().connect(sigc::mem_fun(*this, &Tray::on_powerOnAll_activated));

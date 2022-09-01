@@ -45,3 +45,7 @@ Disable the daemon
 Then you can remove all installed files:
 
 `xargs rm < install_manifest.txt`
+
+# Attributions
+
+<a href="https://www.flaticon.com/free-icons/idea" title="idea icons">Idea icons created by Freepik - Flaticon</a>

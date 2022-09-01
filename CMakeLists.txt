@@ -9,9 +9,13 @@ if (NOT DEFINED CONFIG_PATH)
 set(CONFIG_PATH "$[HOME]/.config/elgatoControl")
 endif()
 
+message(STATUS "Config path: ${CONFIG_PATH}")
+
 if (NOT DEFINED SOCKET_FILE)
     set(SOCKET_FILE "$[HOME]/.local/elgatoDaemon.sock")
 endif()
+
+message(STATUS "Socket file in use: ${SOCKET_FILE}")
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -40,4 +44,6 @@ file(WRITE additional/elgatoDaemon.service "${FILE_CONTENTS}")
 
 INSTALL(TARGETS elgatoDaemon RUNTIME)
 INSTALL(TARGETS elgato-cli RUNTIME)
+INSTALL(TARGETS elgato-ui RUNTIME)
 INSTALL(FILES additional/elgatoDaemon.service DESTINATION ~/.config/systemd/user)
+INSTALL(FILES additional/idea.png DESTINATION ${CMAKE_INSTALL_PREFIX}/share/elgatoControl)
