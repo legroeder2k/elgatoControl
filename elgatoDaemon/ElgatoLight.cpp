@@ -116,7 +116,6 @@ bool ElgatoLight::sendRequest(const std::string& requestBody) {
         if (response.status.code != 200)
             return false;
 
-        // FIXME: This should work different (modifying the state of the Light, and we can also fire a notification here for our clients)
         const auto resString = std::string{response.body.begin(), response.body.end()};
         _stateInfo = std::make_shared<ElgatoStateInfo>(json::parse(resString).get<ElgatoStateInfo>() );
 
