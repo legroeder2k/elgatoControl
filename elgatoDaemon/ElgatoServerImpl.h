@@ -27,16 +27,17 @@
 
 #pragma once
 
+#include <mutex>
 #include <utility>
 
+#include "SharedQueue.h"
 #include "elgato.grpc.pb.h"
 #include "elgato.pb.h"
 
 class ElgatoServerImpl final : public Elgato::Service {
 public:
     void RunServer(const std::string&);
-    void SendFixtureUpdate(std::string fixtureName, std::string propertyName, int32_t newValue);
-
+    void SendFixtureUpdate(std::string, std::string, int32_t);
 
     ::grpc::Status ListFixtures(::grpc::ServerContext*, const Empty*, FixtureList*) override;
     ::grpc::Status Refresh(::grpc::ServerContext*, const Empty*, SimpleCliResponse*) override;
@@ -47,5 +48,33 @@ public:
     ::grpc::Status SetTemperature(::grpc::ServerContext*, const Int32CliRequest*, SimpleCliResponse*) override;
     ::grpc::Status ObserveChanges(::grpc::ServerContext*, const Empty*, ::grpc::ServerWriter<FixtureUpdate>*) override;
 private:
+    class ClientConnection {
+    public:
+        explicit ClientConnection(std::string clientId) : _clientId(std::move(clientId)), _messages(std::make_shared<SharedQueue<FixtureUpdate>>()) { }
+
+        void pushMessage(const FixtureUpdate& message) {
+            _messages->push_back(message);
+        }
+
+        bool hasMessages() {
+            return !_messages->empty();
+        }
+
+        FixtureUpdate getMessage() {
+            auto msg = _messages->front();
+            _messages->pop_front();
+
+            return msg;
+        }
+
+        [[nodiscard]] std::string clientId() const { return _clientId; }
+
+    private:
+        std::string _clientId;
+        std::shared_ptr<SharedQueue<FixtureUpdate>> _messages;
+    };
     static std::string expand_with_environment( const std::string &s );
+
+    std::mutex _connectionMutex;
+    std::vector<ClientConnection> _connections;
 };

@@ -41,9 +41,10 @@ message SimpleCliResponse {
 }
 
 message FixtureUpdate {
-  string fixtureName = 3;
-  string propertyName = 4;
-  int32 newValue = 5;
+  string clientId = 1;
+  string fixtureName = 2;
+  string propertyName = 3;
+  int32 newValue = 4;
 }
 
 message Empty {

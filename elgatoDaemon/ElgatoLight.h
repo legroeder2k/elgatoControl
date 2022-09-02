@@ -86,7 +86,6 @@ public:
     static uint16_t colorToElgato(int colorValue);
     static uint16_t colorFromElgato(int elgatoValue);
 
-    void registerCallback(std::function<void(const ElgatoStateChangedEventArgs&)>&);
 
 private:
     bool sendRequest(const std::string& requestBody);
@@ -94,26 +93,12 @@ private:
     void queryAccessory();
     void queryState();
 
-    void notifyObservers(const ElgatoStateChangedEventArgs&);
-
     std::string _name = {};
     in_addr _address = {};
     uint16_t _port = 0;
 
     std::shared_ptr<ElgatoAccessoryInfo> _accessoryInfo = nullptr;
     std::shared_ptr<ElgatoStateInfo> _stateInfo = nullptr;
-
-    std::vector<std::function<void(const ElgatoStateChangedEventArgs&)>> _callbacks = {};
-};
-
-class ElgatoStateChangedEventArgs final {
-public:
-    explicit ElgatoStateChangedEventArgs(std::string name) : _name(std::move(name)) { }
-
-    std::string name() { return _name; }
-
-private:
-    std::string _name;
 };
 
 void from_json(const nlohmann::json&, ElgatoAccessoryInfo&);

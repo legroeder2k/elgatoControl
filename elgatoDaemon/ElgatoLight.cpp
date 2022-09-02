@@ -122,7 +122,6 @@ bool ElgatoLight::sendRequest(const std::string& requestBody) {
 #if DEBUG_BUILD
         std::clog << kLogDebug << "(ElgatoLight) response: " << resString << std::endl;
 #endif
-        notifyObservers(ElgatoStateChangedEventArgs{name()});
 
         return true;
     } catch (const std::exception& e) {
@@ -143,21 +142,6 @@ uint16_t ElgatoLight::colorToElgato(int colorValue) {
     if (converted > 344) converted = 344;
 
     return converted;
-}
-
-void ElgatoLight::registerCallback(std::function<void(const ElgatoStateChangedEventArgs&)>& observer) {
-    _callbacks.push_back(observer);
-}
-
-void ElgatoLight::notifyObservers(const ElgatoStateChangedEventArgs& args) {
-    if (_callbacks.empty()) return;
-
-    std::thread caller([args, this] {
-        for(const auto& callback : _callbacks){
-            callback(args);
-        }
-    });
-    caller.detach();
 }
 
 void from_json(const json& js, ElgatoAccessoryInfo& info) {

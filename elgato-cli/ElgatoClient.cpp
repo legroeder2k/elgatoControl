@@ -163,7 +163,7 @@ void ElgatoClient::listenForChanges() {
         auto reader = _stub->ObserveChanges(&context, request);
 
         while(reader->Read(&update)) {
-            std::cout << "Update from Server for: " << update.fixturename() << ": " << update.propertyname() << " changed to " << update.newvalue() << std::endl;
+            std::cout << "Update from Server for: " << update.fixturename() << ": " << update.propertyname() << " changed to " << update.newvalue() << "(clid: " << update.clientid() << ")" << std::endl;
         }
     });
 

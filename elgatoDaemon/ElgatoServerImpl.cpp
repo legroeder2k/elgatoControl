@@ -31,7 +31,9 @@
 #include <grpcpp/server_builder.h>
 #include <grpcpp/server_context.h>
 #include <thread>
+#include <uuid/uuid.h>
 
+#include "../Config.h"
 #include "ElgatoServerImpl.h"
 #include "Log.h"
 #include "AvahiBrowser.h"
@@ -108,8 +110,8 @@ Status ElgatoServerImpl::Refresh([[maybe_unused]] ServerContext* _, [[maybe_unus
 
 Status ElgatoServerImpl::PowerOn([[maybe_unused]] ServerContext* _, [[maybe_unused]] const SimpleCliRequest* request, SimpleCliResponse* response ) {
     for(auto& light : AvahiBrowser::getInstance().allByName(request->fixturefilter())) {
-        if (light->isReady())
-            light->powerOn();
+        if (light->isReady() && light->powerOn())
+            SendFixtureUpdate(light->name(), "Power", 1);
     }
 
     response->set_successful(true);
@@ -118,8 +120,8 @@ Status ElgatoServerImpl::PowerOn([[maybe_unused]] ServerContext* _, [[maybe_unus
 
 Status ElgatoServerImpl::PowerOff([[maybe_unused]] ServerContext* _, [[maybe_unused]] const SimpleCliRequest* request, SimpleCliResponse* response ) {
     for(auto& light : AvahiBrowser::getInstance().allByName(request->fixturefilter())) {
-        if (light->isReady())
-            light->powerOff();
+        if (light->isReady() && light->powerOff())
+            SendFixtureUpdate(light->name(), "Power", 0);
     }
 
     response->set_successful(true);
@@ -128,8 +130,8 @@ Status ElgatoServerImpl::PowerOff([[maybe_unused]] ServerContext* _, [[maybe_unu
 
 Status ElgatoServerImpl::SetBrightness([[maybe_unused]] ServerContext* _, const Int32CliRequest* request, SimpleCliResponse* response) {
     for(auto& light : AvahiBrowser::getInstance().allByName(request->fixturefilter())) {
-        if (light->isReady())
-            light->setBrightness(request->newvalue());
+        if (light->isReady() && light->setBrightness(request->newvalue()))
+            SendFixtureUpdate(light->name(), "Brightness", request->newvalue());
     }
 
     response->set_successful(true);
@@ -138,8 +140,8 @@ Status ElgatoServerImpl::SetBrightness([[maybe_unused]] ServerContext* _, const 
 
 Status ElgatoServerImpl::SetTemperature([[maybe_unused]] ServerContext* _, const Int32CliRequest* request, SimpleCliResponse* response) {
     for(auto& light : AvahiBrowser::getInstance().allByName(request->fixturefilter())) {
-        if (light->isReady())
-            light->setTemperature(request->newvalue());
+        if (light->isReady() && light->setTemperature(request->newvalue()))
+            SendFixtureUpdate(light->name(), "Temperature", request->newvalue());
     }
 
     response->set_successful(true);
@@ -147,16 +149,58 @@ Status ElgatoServerImpl::SetTemperature([[maybe_unused]] ServerContext* _, const
 }
 
 Status ElgatoServerImpl::ObserveChanges([[maybe_unused]] ::grpc::ServerContext* context, [[maybe_unused]] const Empty* emptyRequest, ::grpc::ServerWriter<FixtureUpdate>* writer) {
+    // Create a client id
+    uuid_t uuid;
+    uuid_generate(uuid);
+    char uuidString[37];
+    uuid_unparse(uuid, uuidString);
+
+    std::unique_lock<std::mutex> mLock(_connectionMutex);
+    auto clientConnection = ClientConnection(uuidString);
+    _connections.push_back(clientConnection);
+    mLock.unlock();
+
+#if DEBUG_BUILD
+    std::clog << kLogNotice << "Client " << uuidString << "connected." << std::endl;
+#endif
+
+    FixtureUpdate clientIdResponse;
+    clientIdResponse.set_clientid(uuidString);
+    writer->Write(clientIdResponse);
+
+    // How to do it - good question :)
     while(!context->IsCancelled()) {
-        std::this_thread::sleep_for(2s);
-
-        FixtureUpdate newUpdate;
-        newUpdate.set_fixturename("Test Loop");
-        newUpdate.set_propertyname("TestProp");
-        newUpdate.set_newvalue(1);
-
-        writer->Write(newUpdate);
+        auto message = clientConnection.getMessage();
+        if (!context->IsCancelled())
+            writer->Write(message);
     }
 
+#if DEBUG_BUILD
+    std::clog << kLogNotice << "Client " << uuidString << "disconnected." << std::endl;
+#endif
+
+    mLock.lock();
+    _connections.erase(
+            std::remove_if(_connections.begin(), _connections.end(), [uuidString](const ClientConnection& item) {
+                return item.clientId() == uuidString;
+            }), _connections.end());
+    mLock.unlock();
+
     return Status::OK;
+}
+
+void ElgatoServerImpl::SendFixtureUpdate(std::string fixtureName, std::string propertyName, int32_t newValue) {
+    std::thread notifyThread([this, fixtureName, propertyName, newValue]{
+        FixtureUpdate update;
+        update.set_fixturename(fixtureName);
+        update.set_propertyname(propertyName);
+        update.set_newvalue(newValue);
+
+        std::unique_lock<std::mutex> mLock(_connectionMutex);
+        for(auto& clientConnection : _connections) {
+            clientConnection.pushMessage(update);
+        }
+    });
+
+    notifyThread.detach();
 }
