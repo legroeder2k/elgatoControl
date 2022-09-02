@@ -40,7 +40,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
             { "powerOff",   optional_argument,nullptr,'O' },
             { "brightness", optional_argument,nullptr,'b' },
             { "temperature",optional_argument,nullptr,'t' },
-            { "help",       optional_argument,nullptr,'h' }
+            { "help",       optional_argument,nullptr,'h' },
+            {"listen",      optional_argument,nullptr,'L' },
     };
 
     bool listMode = false;
@@ -54,13 +55,17 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     long temperature = 0;
     bool showLongHelp = false;
     bool showShortHelp = false;
+    bool listen = false;
 
     while(1) {
         int index = -1;
-        auto result = getopt_long(argc, argv, "lnoOh", long_options, &index);
+        auto result = getopt_long(argc, argv, "LlnoOh", long_options, &index);
         if (result == -1) break;
 
         switch(result) {
+            case 'L':
+                listen = true;
+                break;
             case 'l':
                 listMode = true;
                 break;
@@ -105,10 +110,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
         }
     }
 
-    if (!listMode && !refresh && !powerOn && !powerOff && !showLongHelp && !setBrightness && !setTemperature)
+    if (!listMode && !refresh && !powerOn && !powerOff && !showLongHelp && !setBrightness && !setTemperature && !listen)
         showShortHelp = true;
 
-    if (!listMode && !refresh && !showShortHelp && !showLongHelp && nameOfLight.empty())
+    if (!listMode && !refresh && !listen && !showShortHelp && !showLongHelp && nameOfLight.empty())
         showShortHelp = true;
 
     if (!nameOfLight.empty() && !powerOn && !powerOff && !showLongHelp && !setBrightness && !setTemperature)
@@ -144,6 +149,20 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     // At this point we should know what to do :)
     auto channel = ElgatoClient::createChannel(SOCKET_FILE);
     ElgatoClient client(channel);
+
+    if (listen) {
+        client.listenForChanges();
+
+        std::string line;
+        std::cout << "Console interface:\n  q -> quit" << std::endl;
+        std::getline(std::cin, line);
+
+        while (line != "q") {
+            std::getline(std::cin, line);
+        }
+
+        return 0;
+    }
 
     if (listMode) {
         fmt::print("Discovered fixtures:\n");

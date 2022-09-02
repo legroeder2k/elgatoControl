@@ -153,3 +153,19 @@ void ElgatoClient::setTemperature(const std::string& fixtureFilter, long newValu
     else
         fmt::print(" Error!\n");
 }
+
+void ElgatoClient::listenForChanges() {
+    _listenerThread = new std::thread([this] {
+        ClientContext context;
+        Empty request;
+        FixtureUpdate update;
+
+        auto reader = _stub->ObserveChanges(&context, request);
+
+        while(reader->Read(&update)) {
+            std::cout << "Update from Server for: " << update.fixturename() << ": " << update.propertyname() << " changed to " << update.newvalue() << std::endl;
+        }
+    });
+
+    //_listenerThread->detach();
+}

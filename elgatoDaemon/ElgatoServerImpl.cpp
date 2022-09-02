@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <chrono>
 #include <grpc/grpc.h>
 #include <grpcpp/security/server_credentials.h>
 #include <grpcpp/server.h>
@@ -44,6 +45,8 @@ using ::Fixture;
 using ::FixtureList;
 using ::SimpleCliRequest;
 using ::SimpleCliResponse;
+
+using namespace std::chrono_literals;
 
 void ElgatoServerImpl::RunServer(const std::string& socketPath) {
     auto server_address = "unix://" + expand_with_environment(socketPath);
@@ -140,5 +143,20 @@ Status ElgatoServerImpl::SetTemperature([[maybe_unused]] ServerContext* _, const
     }
 
     response->set_successful(true);
+    return Status::OK;
+}
+
+Status ElgatoServerImpl::ObserveChanges([[maybe_unused]] ::grpc::ServerContext* context, [[maybe_unused]] const Empty* emptyRequest, ::grpc::ServerWriter<FixtureUpdate>* writer) {
+    while(!context->IsCancelled()) {
+        std::this_thread::sleep_for(2s);
+
+        FixtureUpdate newUpdate;
+        newUpdate.set_fixturename("Test Loop");
+        newUpdate.set_propertyname("TestProp");
+        newUpdate.set_newvalue(1);
+
+        writer->Write(newUpdate);
+    }
+
     return Status::OK;
 }

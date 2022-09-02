@@ -31,6 +31,7 @@
 #include <grpc/grpc.h>
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
+#include <thread>
 
 #include "elgato.grpc.pb.h"
 
@@ -49,8 +50,11 @@ public:
     void setBrightness(const std::string&, long);
     void setTemperature(const std::string&, long);
 
+    void listenForChanges();
+
 private:
     static std::string expand_with_environment( const std::string &s );
-    std::unique_ptr<Elgato::Stub> _stub;
 
+    std::unique_ptr<Elgato::Stub> _stub;
+    std::thread* _listenerThread;
 };

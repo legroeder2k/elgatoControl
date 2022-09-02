@@ -27,12 +27,16 @@
 
 #pragma once
 
+#include <utility>
+
 #include "elgato.grpc.pb.h"
 #include "elgato.pb.h"
 
 class ElgatoServerImpl final : public Elgato::Service {
 public:
     void RunServer(const std::string&);
+    void SendFixtureUpdate(std::string fixtureName, std::string propertyName, int32_t newValue);
+
 
     ::grpc::Status ListFixtures(::grpc::ServerContext*, const Empty*, FixtureList*) override;
     ::grpc::Status Refresh(::grpc::ServerContext*, const Empty*, SimpleCliResponse*) override;
@@ -41,6 +45,7 @@ public:
     ::grpc::Status PowerOff(::grpc::ServerContext*, const SimpleCliRequest*, SimpleCliResponse*) override;
     ::grpc::Status SetBrightness(::grpc::ServerContext*, const Int32CliRequest*, SimpleCliResponse*) override;
     ::grpc::Status SetTemperature(::grpc::ServerContext*, const Int32CliRequest*, SimpleCliResponse*) override;
+    ::grpc::Status ObserveChanges(::grpc::ServerContext*, const Empty*, ::grpc::ServerWriter<FixtureUpdate>*) override;
 private:
     static std::string expand_with_environment( const std::string &s );
 };

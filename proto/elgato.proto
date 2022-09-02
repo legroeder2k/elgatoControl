@@ -8,6 +8,8 @@ service Elgato {
   rpc PowerOff(SimpleCliRequest) returns (SimpleCliResponse);
   rpc SetBrightness(Int32CliRequest) returns (SimpleCliResponse);
   rpc SetTemperature(Int32CliRequest) returns (SimpleCliResponse);
+
+  rpc ObserveChanges(Empty) returns (stream FixtureUpdate);
 }
 
 message FixtureList {
@@ -36,6 +38,12 @@ message SimpleCliRequest {
 
 message SimpleCliResponse {
   bool successful = 1;
+}
+
+message FixtureUpdate {
+  string fixtureName = 3;
+  string propertyName = 4;
+  int32 newValue = 5;
 }
 
 message Empty {
