@@ -25,6 +25,8 @@
  */
 
 #include "SettingsWindow.h"
+#include "ElgatoClient.h"
+#include <functional>
 #include "../Config.h"
 
 SettingsWindow::SettingsWindow(std::shared_ptr<std::vector<std::shared_ptr<RemoteFixture>>>& fixtures, std::shared_ptr<ElgatoClient>& elgatoClient)
@@ -40,6 +42,8 @@ SettingsWindow::SettingsWindow(std::shared_ptr<std::vector<std::shared_ptr<Remot
     _boxLayout.set_homogeneous();
 
     add(_boxLayout);
+
+    _elgatoClient->registerCallback(sigc::mem_fun(*this, &SettingsWindow::onFixtureChanged));
 }
 
 void SettingsWindow::refreshFixtures() {
@@ -60,6 +64,17 @@ void SettingsWindow::refreshFixtures() {
     _boxLayout.show_all();
 
     set_size_request(400, (20 + ((int)_fixtures->size()*100)));
+}
+
+void SettingsWindow::onFixtureChanged(const FixtureUpdateEventArgs& args) {
+#ifdef DEBUG_BUILD
+    std::cerr << "Fixture Update for " << args.fixtureName() << " prop " << args.propertyName() << " is now " << args.newValue() << std::endl;
+#endif
+
+    for(auto& fixtureItem : _children) {
+        if (fixtureItem->fixtureName() == args.fixtureName())
+            fixtureItem->refreshFromData(args);
+    }
 }
 
 FixtureItem::FixtureItem(std::shared_ptr<RemoteFixture>& fixture, std::shared_ptr<ElgatoClient>& client)
@@ -124,6 +139,9 @@ FixtureItem::FixtureItem(std::shared_ptr<RemoteFixture>& fixture, std::shared_pt
 }
 
 void FixtureItem::onPowerToggle() {
+    if (_inUpdateFromServer) return;
+
+    _inUpdateFromUi = true;
     if (_fixture->_powerState) {
         if (_client->powerOff(_fixture->_name)) {
             _fixture->_powerState = false;
@@ -134,21 +152,61 @@ void FixtureItem::onPowerToggle() {
             _fixture->_powerState = true;
         }
     }
+    _inUpdateFromUi = false;
 }
 
 void FixtureItem::onBrightnessChanged() {
+    if (_inUpdateFromServer) return;
+
+    _inUpdateFromUi = true;
     auto newValue = (int32_t)std::round(_brightness.get_value());
 
-    if (_client->setBrightness(_fixture->_name, newValue))
-    {
+    if (_client->setBrightness(_fixture->_name, newValue)) {
         _fixture->_brightness = newValue;
     }
+    _inUpdateFromUi = false;
 }
 
 void FixtureItem::onColorTempChanged() {
+    if (_inUpdateFromServer) return;
+
+    _inUpdateFromUi = true;
     auto newValue = (int32_t)std::round(_colorTemp.get_value());
 
     if (_client->setColorTemp(_fixture->_name, newValue)) {
         _fixture->_temperature = newValue;
     }
+    _inUpdateFromUi = false;
+}
+
+void FixtureItem::refreshFromData(const FixtureUpdateEventArgs& args) {
+    if (_inUpdateFromUi) return;
+    _inUpdateFromServer = true;
+
+    if (args.propertyName() == "Power") {
+        _fixture->_powerState = args.newValue() == 1;
+        _powerButton.set_active(args.newValue() == 1);
+    }
+
+    if (args.propertyName() == "Brightness") {
+        auto value = args.newValue();
+
+        if (value < 0) value = 0;
+        if (value > 100) value = 100;
+
+        _fixture->_brightness = value;
+        _brightness.set_value(value);
+    }
+
+    if (args.propertyName() == "Temperature") {
+        auto value = args.newValue();
+
+        if (value < 2900) value = 2900;
+        if (value > 7000) value = 7000;
+
+        _fixture->_temperature = value;
+        _colorTemp.set_value(value);
+    }
+
+    _inUpdateFromServer = false;
 }

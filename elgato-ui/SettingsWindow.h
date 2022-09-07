@@ -31,9 +31,14 @@
 
 #include "ElgatoClient.h"
 
+class FixtureUpdateEventArgs;
+
 class FixtureItem : public Gtk::Frame {
 public:
     FixtureItem(std::shared_ptr<RemoteFixture>&, std::shared_ptr<ElgatoClient>&);
+    [[nodiscard]] std::string fixtureName() const { return  _fixture->_name; }
+
+    void refreshFromData(const FixtureUpdateEventArgs&);
 
 protected:
     virtual void onPowerToggle();
@@ -43,6 +48,9 @@ protected:
 private:
     std::shared_ptr<RemoteFixture> _fixture;
     std::shared_ptr<ElgatoClient> _client;
+
+    volatile bool _inUpdateFromServer = false;
+    volatile bool _inUpdateFromUi = false;
 
     Gtk::Fixed _fixedLayout;
 
@@ -64,9 +72,9 @@ public:
 protected:
 
 private:
+    void onFixtureChanged(const FixtureUpdateEventArgs&);
     std::shared_ptr<std::vector<std::shared_ptr<RemoteFixture>>> _fixtures;
     std::shared_ptr<ElgatoClient> _elgatoClient;
-
     std::vector<std::shared_ptr<FixtureItem>> _children;
 
     Gtk::Box _boxLayout;

@@ -125,3 +125,33 @@ bool ElgatoClient::setColorTemp(std::string fixtureFilter, uint32_t colorTemp)
     return status.ok() && response.successful();
 }
 
+void ElgatoClient::listenForChanges() {
+    _listenerThread = std::make_unique<std::thread>([this] {
+        ClientContext context;
+        Empty request;
+        FixtureUpdate update;
+
+        auto reader = _stub->ObserveChanges(&context, request);
+
+        while(reader->Read(&update)) {
+            notifyObservers({update.fixturename(), update.propertyname(), update.newvalue()});
+        }
+    });
+
+    _listenerThread->detach();
+}
+
+void ElgatoClient::registerCallback(const std::function<void(const FixtureUpdateEventArgs)>& observer) {
+    _callbacks.emplace_back(observer);
+}
+
+void ElgatoClient::notifyObservers(const FixtureUpdateEventArgs& args) {
+    if (_callbacks.empty()) return;
+
+    std::thread caller([args, this] {
+        for(const auto& callback : _callbacks) {
+            callback(args);
+        }
+    });
+    caller.detach();
+}

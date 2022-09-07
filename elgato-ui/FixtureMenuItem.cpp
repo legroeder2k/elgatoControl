@@ -59,7 +59,6 @@ void FixtureMenuItem::onPowerToggle() {
 
 void FixtureMenuItem::onActivateItem() {
     // update the power checkbox to the correct value
-
     _inGuiUpdate = true;
     _powerItem.set_active(_myFixture->_powerState);
     _inGuiUpdate = false;

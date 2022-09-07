@@ -32,10 +32,27 @@
 #include <grpc/grpc.h>
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
+#include <thread>
+#include <sigc++/slot.h>
 
 #include "elgato.grpc.pb.h"
 
 using grpc::Channel;
+
+class FixtureUpdateEventArgs final {
+public:
+    FixtureUpdateEventArgs(std::string fixtureName, std::string propertyName, int32_t newValue)
+        : _fixtureName(std::move(fixtureName)), _propertyName(std::move(propertyName)), _newValue(newValue) { }
+
+    [[nodiscard]] std::string fixtureName() const { return _fixtureName; }
+    [[nodiscard]] std::string propertyName() const { return _propertyName; }
+    [[nodiscard]] int32_t newValue() const { return _newValue; }
+
+private:
+    std::string _fixtureName;
+    std::string _propertyName;
+    int32_t _newValue;
+};
 
 struct RemoteFixture {
     RemoteFixture(std::string name, bool isReady, std::string displayName, std::string productName,
@@ -61,16 +78,26 @@ struct RemoteFixture {
 
 class ElgatoClient final {
 public:
-    explicit ElgatoClient(const std::shared_ptr<Channel> &channel) : _stub(Elgato::NewStub(channel)) { }
-    static std::shared_ptr<Channel> createChannel(const std::string&);
+    explicit ElgatoClient(const std::shared_ptr<Channel> &channel) :
+        _stub(Elgato::NewStub(channel)),
+        _callbacks(std::vector<std::function<void(const FixtureUpdateEventArgs)>>()) { }
 
+    static std::shared_ptr<Channel> createChannel(const std::string&);
     std::vector<std::shared_ptr<RemoteFixture>> listFixtures();
 
     bool powerOn(std::string);
     bool powerOff(std::string);
     bool setBrightness(std::string, uint32_t);
     bool setColorTemp(std::string, uint32_t);
+
+    void listenForChanges();
+    void registerCallback(const std::function<void(const FixtureUpdateEventArgs)>&);
 private:
+    void notifyObservers(const FixtureUpdateEventArgs&);
+
     static std::string expand_with_environment(const std::string& );
     std::unique_ptr<Elgato::Stub> _stub;
+    std::vector<std::function<void(const FixtureUpdateEventArgs)>> _callbacks;
+
+    std::unique_ptr<std::thread> _listenerThread;
 };

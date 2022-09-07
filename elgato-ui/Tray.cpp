@@ -62,6 +62,7 @@ Tray::Tray(const std::shared_ptr<Channel> &channel)
 
     set_visible(true);
 
+    _client->listenForChanges();
     _refreshListItem.activate();
 }
 
