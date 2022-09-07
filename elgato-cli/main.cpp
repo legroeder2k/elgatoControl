@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2022, Sascha Huck <sascha@wirrewelt.de>
- * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -120,14 +119,14 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
         showShortHelp = true;
 
     if (showShortHelp) {
-        fmt::print("Usage: {} --name=\"<name>\" <OPTIONEN>\n", argv[0]);
+        fmt::print("Usage: {} --name=\"<name>\" <OPTIONS>\n", argv[0]);
         fmt::print("Try '{} --help' for more informations.\n", argv[0]);
 
         return 0;
     }
 
     if (showLongHelp) {
-        fmt::print("Usage: {} <OPTIONEN>\n", argv[0]);
+        fmt::print("Usage: {} <OPTIONS>\n", argv[0]);
         fmt::print("Send a command to the elgatoDaemon.\n");
         fmt::print("Example: {} --name=\"*\" --powerOn\n\n", argv[0]);
 
