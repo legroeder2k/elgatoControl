@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <unistd.h>
 #include "../Config.h"
 #include "Log.h"
 #include "AvahiBrowser.h"
@@ -89,7 +90,9 @@ int main([[maybe_unused]]int argc, [[maybe_unused]]char*argv[]) {
     }
 #else
     volatile int keep_spinning = 1;
-    while(keep_spinning) { }
+    while(keep_spinning) {
+        sleep(1);
+    }
 #endif
 
     return 0;
